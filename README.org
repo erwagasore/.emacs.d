@@ -540,15 +540,6 @@ process differently clear, man commands
     :defer t
     :commands scratch)
 #+END_SRC
-* Zoom-frm
-#+BEGIN_SRC emacs-lisp
-  (use-package zoom-frm
-    :ensure t
-    :bind (("C-x s-=" . zoom-in/out)
-           ("C-x <s-return>" . toggle-zoom-frame))
-    :config
-    (setq frame-zoom-font-difference 10))
-#+END_SRC
 * Smartscan
 #+BEGIN_SRC emacs-lisp
   (use-package smartscan
