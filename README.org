@@ -413,7 +413,9 @@ at point as the default value for occur.
     (interactive)
     (when (and (eshell-search-path "git")
                (locate-dominating-file pwd ".git"))
-      (let ((git-output (shell-command-to-string (concat "cd " pwd " && git branch | grep '\\*' | sed -e 's/^\\* //'"))) (git-icon "\xf020"))
+      (let ((git-output (shell-command-to-string
+                         (concat "cd " pwd " && git branch | grep '\\*' | sed -e 's/^\\* //'")))
+            (git-icon "\xf020"))
         (if (> (length git-output) 0) (concat git-icon " " (substring git-output 0 -1)) ""))))
 
   (setq eshell-prompt-function
@@ -432,6 +434,34 @@ at point as the default value for occur.
            (propertize "\n" 'face nil)
            (propertize "╰🡢" 'face '(:foreground "#A2DEB2"))
            (propertize " " 'face nil))))
+
+  ;; Set this to match eshell-prompt-function
+  (setq eshell-prompt-regexp "╰🡢 ")
+
+  ;; define portable aliases
+  (setq eshell-command-aliases-list ())
+  (defun +alias (al cmd)
+    "handy wrapper function to convert alias symbols to alias
+  strings to avoid writing 4 quotes per alias. AL is a single-word
+  symbol naming the alias, CMD is a list symbol describing the
+  command."
+    (add-to-list 'eshell-command-aliases-list
+                 (list (symbol-name al)
+                       (mapconcat 'symbol-name cmd " "))))
+
+  ;; actual aliases
+  (+alias 'l      '(ls -laF))
+  (+alias 'll     '(ls -l))
+  (+alias 'la     '(ls -a))
+  (+alias 'lt     '(ls -ltr $*))
+  (+alias '..     '(cd ..))
+  (+alias '...    '(cd ../..))
+  (+alias '....   '(cd ../../..))
+  (+alias '.....  '(cd ../../../..))
+  (+alias 'md     '(mkdir -p))
+  (+alias 'emacs  '(find-file $1))
+  (+alias 'less   '(find-file-read-only $1))
+
 #+END_SRC
 * Shell configurations
 Preprocess commands sent to shell prompt and
