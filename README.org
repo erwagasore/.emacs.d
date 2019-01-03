@@ -418,6 +418,19 @@ at point as the default value for occur.
             (git-icon "\xf020"))
         (if (> (length git-output) 0) (concat git-icon " " (substring git-output 0 -1)) ""))))
 
+  (defun get-first-char (str)
+    (if (zerop (length str)) "" (substring str 0 1)))
+
+  (defun pwd-shorten-dirs (pwd)
+    "Shorten all directory names in PWD except the last two."
+    (let ((path-items (split-string pwd "/")))
+      (if (> (length path-items) 2)
+          (concat
+           (mapconcat 'get-first-char (butlast path-items 2) "/")
+           "/"
+           (mapconcat (lambda (item) item) (last path-items 2) "/"))
+        pwd)))
+
   (setq eshell-prompt-function
         (lambda nil
           (concat
@@ -436,7 +449,7 @@ at point as the default value for occur.
            (propertize " " 'face nil))))
 
   ;; Set this to match eshell-prompt-function
-  (setq eshell-prompt-regexp "╰🡢 ")
+  (setq eshell-prompt-regexp "^.+\n╭⟢.+\n╰🡢 $")
 
   ;; define portable aliases
   (setq eshell-command-aliases-list ())
@@ -462,6 +475,13 @@ at point as the default value for occur.
   (+alias 'emacs  '(find-file $1))
   (+alias 'less   '(find-file-read-only $1))
 
+  ;; Docker
+  (+alias 'd '(docker $*))
+  (+alias 'dc '(docker-compose $*))
+  (+alias 'dm '(docker-machine $*))
+
+  ;; HTTPie
+  (+alias 'https '(http --default-scheme=https $*))
 #+END_SRC
 * Shell configurations
 Preprocess commands sent to shell prompt and
