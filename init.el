@@ -37,10 +37,10 @@
 ;; use-package is used to configure the rest of the packages.
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
-  (package-install 'use-package))
+  (package-install 'use-package)
+  (package-install 'diminish))
 
-(eval-when-compile
-  (require 'use-package))
+(eval-when-compile (require 'use-package))
 (require 'diminish)                ;; if you use :diminish
 (require 'bind-key)                ;; if you use any :bind variant
 ;(setq use-package-verbose t)
