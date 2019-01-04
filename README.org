@@ -414,16 +414,17 @@ Look also in comment section to get other tricks.
       (let ((inhibit-read-only t)) (erase-buffer))))
 
   (defun git-prompt-branch-name ()
-      "Get current git branch name"
-      (let ((args '("symbolic-ref" "HEAD" "--short")))
-        (with-temp-buffer
-          (apply #'process-file "git" nil (list t nil) nil args)
-          (unless (bobp)
-            (goto-char (point-min))
-            (buffer-substring-no-properties (point) (line-end-position))))))
+    "Get current git branch name"
+    (let ((args '("symbolic-ref" "HEAD" "--short")))
+      (with-temp-buffer
+        (apply #'process-file "git" nil (list t nil) nil args)
+        (unless (bobp)
+          (goto-char (point-min))
+          (buffer-substring-no-properties (point) (line-end-position))))))
 
-(defun display-git-prompt-branch ()
-  (if (not (null (git-prompt-branch-name))) (git-prompt-branch-name) ""))
+  ;; FIXME there should be a better way to have this done in the top function
+  (defun display-git-prompt-branch ()
+    (if (not (null (git-prompt-branch-name))) (git-prompt-branch-name) ""))
 
   (defun get-first-char (str)
     (if (zerop (length str)) "" (substring str 0 1)))
@@ -450,22 +451,23 @@ Look also in comment section to get other tricks.
            (propertize " " 'face nil)
            (propertize (display-git-prompt-branch) 'face '(:foreground "#F1F5F9")) ""
            (propertize " ⯌ " 'face nil)
-           (propertize (abbreviate-file-name (eshell/pwd)) 'face '(:foreground "#74CAFF"))
+           (propertize (pwd-shorten-dirs (abbreviate-file-name (eshell/pwd)))
+                       'face '(:foreground "#74CAFF"))
            (propertize "\n" 'face nil)
            (propertize "╰🡢" 'face '(:foreground "#A2DEB2"))
            (propertize " " 'face nil))))
 
   ;; Set this to match eshell-prompt-function
-  (setq eshell-prompt-regexp "^.+\n╭⟢.+\n╰🡢 $")
+  (setq eshell-prompt-regexp "^╰🡢 ")
 
   ;; define portable aliases
   (setq eshell-command-aliases-list ())
 
   (defun +alias (al cmd)
     "handy wrapper function to convert alias symbols to alias
-  strings to avoid writing 4 quotes per alias. AL is a single-word
-  symbol naming the alias, CMD is a list symbol describing the
-  command."
+      strings to avoid writing 4 quotes per alias. AL is a single-word
+      symbol naming the alias, CMD is a list symbol describing the
+      command."
     (add-to-list 'eshell-command-aliases-list
                  (list (symbol-name al)
                        (mapconcat 'symbol-name cmd " "))))
