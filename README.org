@@ -424,7 +424,7 @@ Look also in comment section to get other tricks.
 
   ;; FIXME there should be a better way to have this done in the top function
   (defun display-git-prompt-branch ()
-    (if (not (null (git-prompt-branch-name))) (concat ":" (git-prompt-branch-name)) ""))
+    (if (not (null (git-prompt-branch-name))) (concat "￨" (git-prompt-branch-name)) ""))
 
   (defun get-first-char (str)
     (if (zerop (length str)) "" (substring str 0 1)))
@@ -721,34 +721,35 @@ process differently clear, man commands
 #+END_SRC
 * Company mode
 #+BEGIN_SRC emacs-lisp
-    (use-package company
-      :ensure t
-      :config
-      (progn 
-        (setq company-idle-delay 0.3)
-        (setq company-tooltip-limit 20)
-        (setq company-minimum-prefix-length 2)
-        (setq company-echo-delay 0)
+  (use-package company
+    :ensure t
+    :config
+    (progn 
+      (setq company-idle-delay 0.3)
+      (setq company-tooltip-limit 20)
+      (setq company-minimum-prefix-length 2)
+      (setq company-echo-delay 0)
+      (setq company-dabbrev-downcase nil)
 
-        (add-hook 'after-init-hook 'global-company-mode)
+      (add-hook 'after-init-hook 'global-company-mode)
 
-        (eval-after-load 'company
-          `(let (( Map  company-active-map))
-             (define-key company-active-map (kbd "\C-n") 'company-select-next)
-             (define-key company-active-map (kbd "\C-n") 'company-select-next)
-             (define-key company-active-map (kbd "\C-p") 'company-select-previous)
-             (define-key company-active-map (kbd "\C-d") 'company-show-doc-buffer)
-             (define-key company-active-map (kbd "<tab>") 'company-complete)))))
+      (eval-after-load 'company
+        `(let (( Map  company-active-map))
+           (define-key company-active-map (kbd "\C-n") 'company-select-next)
+           (define-key company-active-map (kbd "\C-n") 'company-select-next)
+           (define-key company-active-map (kbd "\C-p") 'company-select-previous)
+           (define-key company-active-map (kbd "\C-d") 'company-show-doc-buffer)
+           (define-key company-active-map (kbd "<tab>") 'company-complete)))))
 
-    ;; (use-package company-shell
-    ;;   :after company
-    ;;   :config
-    ;;   (add-to-list 'company-backends #'company-shell))
+  (use-package company-shell
+    :after company
+    :config
+    (add-to-list 'company-backends #'company-shell))
 
   (use-package company-tern
-      :after company
-      :config
-      (add-to-list 'company-backends #'company-tern))
+    :after company
+    :config
+    (add-to-list 'company-backends #'company-tern))
 #+END_SRC
 
 * Epub mode
