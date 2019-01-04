@@ -424,7 +424,7 @@ Look also in comment section to get other tricks.
 
   ;; FIXME there should be a better way to have this done in the top function
   (defun display-git-prompt-branch ()
-    (if (not (null (git-prompt-branch-name))) (git-prompt-branch-name) ""))
+    (if (not (null (git-prompt-branch-name))) (concat ":" (git-prompt-branch-name)) ""))
 
   (defun get-first-char (str)
     (if (zerop (length str)) "" (substring str 0 1)))
