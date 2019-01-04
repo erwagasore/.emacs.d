@@ -396,8 +396,8 @@ at point as the default value for occur.
 * Eshell configuration
 Making git and eshell work together it is better to use the trick i found in [[https://hexmode.com/2016/05/making-git-and-emacs-eshell-work-together/][hexmode]] blogpost.
 Look also in comment section to get other tricks.
-#+BEGIN_SRC sh
-  git config --global core.pager '`test "$TERM" = "dumb" && echo cat || echo less`'
+#+BEGIN_SRC emacs-shell
+  (setenv “GIT_PAGER” “”)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -413,16 +413,17 @@ Look also in comment section to get other tricks.
       (interactive)
       (let ((inhibit-read-only t)) (erase-buffer))))
 
-  (defun curr-dir-git-branch-string (pwd)
-    "Returns current git branch as a string, or the empty string if
-  PWD is not in a git repo (or the git command is not found)."
-    (interactive)
-    (when (and (eshell-search-path "git")
-               (locate-dominating-file pwd ".git"))
-      (let ((git-output (shell-command-to-string
-                         (concat "cd " pwd " && git branch | grep '\\*' | sed -e 's/^\\* //'")))
-            (git-icon "\xf020"))
-        (if (> (length git-output) 0) (concat git-icon " " (substring git-output 0 -1)) ""))))
+  (defun git-prompt-branch-name ()
+      "Get current git branch name"
+      (let ((args '("symbolic-ref" "HEAD" "--short")))
+        (with-temp-buffer
+          (apply #'process-file "git" nil (list t nil) nil args)
+          (unless (bobp)
+            (goto-char (point-min))
+            (buffer-substring-no-properties (point) (line-end-position))))))
+
+(defun display-git-prompt-branch ()
+  (if (not (null (git-prompt-branch-name))) (git-prompt-branch-name) ""))
 
   (defun get-first-char (str)
     (if (zerop (length str)) "" (substring str 0 1)))
@@ -447,7 +448,7 @@ Look also in comment section to get other tricks.
            (propertize "@" 'face '(:foreground "#0057FF"))
            (propertize (system-name) 'face '(:foreground "#0083FF"))
            (propertize " " 'face nil)
-           (propertize (curr-dir-git-branch-string (eshell/pwd)) 'face '(:foreground "#F1F5F9"))
+           (propertize (display-git-prompt-branch) 'face '(:foreground "#F1F5F9")) ""
            (propertize " ⯌ " 'face nil)
            (propertize (abbreviate-file-name (eshell/pwd)) 'face '(:foreground "#74CAFF"))
            (propertize "\n" 'face nil)
