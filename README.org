@@ -393,6 +393,17 @@ at point as the default value for occur.
   ;; Don't make new frames when opening a new file with Emacs
   (setq ns-pop-up-frames nil)
 #+END_SRC
+* Environment configuration
+~exec-path-from-shell~ makes the command-line path with Emacs’s shell match the same one on macOS.
+#+BEGIN_SRC emacs-lisp
+  (use-package exec-path-from-shell
+    :ensure t
+    :if (memq window-system '(mac ns x))
+    :config
+    (setenv "SHELL" "/bin/bash")
+    (exec-path-from-shell-initialize)
+    (exec-path-from-shell-copy-envs '("PATH")))
+#+END_SRC
 * Eshell configuration
 Making git and eshell work together it is better to use the trick i found in [[https://hexmode.com/2016/05/making-git-and-emacs-eshell-work-together/][hexmode]] blogpost.
 Look also in comment section to get other tricks.
@@ -528,18 +539,6 @@ process differently clear, man commands
 
   (ansi-color-for-comint-mode-on)
   (add-hook 'shell-mode-hook 'shell-mode-proprocessor-hook)
-#+END_SRC
-
-~exec-path-from-shell~ makes the command-line path with Emacs’s shell match the same one on macOS.
-
-#+BEGIN_SRC emacs-lisp
-  (use-package exec-path-from-shell
-    :ensure t
-    :if (memq window-system '(mac ns x))
-    :config
-    (setenv "SHELL" "/bin/bash")
-    (exec-path-from-shell-initialize)
-    (exec-path-from-shell-copy-envs '("PATH")))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp

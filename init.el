@@ -18,7 +18,7 @@
 ;; define font and positioning
 (setq-default line-spacing 5)
 (setq-default line-pixel-height 5)
-(add-to-list 'default-frame-alist '(font . "PragmataPro-15"))
+(add-to-list 'default-frame-alist '(font . "PragmataPro-15:antialias=none"))
 (add-to-list 'default-frame-alist '(top . 251))
 (add-to-list 'default-frame-alist '(left . 374))
 (add-to-list 'default-frame-alist '(height . 32))
