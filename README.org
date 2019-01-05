@@ -416,7 +416,12 @@ Look also in comment section to get other tricks.
     :init
     (setq
      eshell-banner-message ""
+     eshell-hist-ignoredups t
+     eshell-error-if-no-glob t
      eshell-cmpl-ignore-case t
+     eshell-save-history-on-exit t
+     eshell-prefer-lisp-functions nil
+     eshell-destroy-buffer-when-process-dies t
      eshell-scroll-to-bottom-on-input 'all)
     :config
     (defun eshell/clear ()
@@ -455,54 +460,58 @@ Look also in comment section to get other tricks.
           (concat
            (propertize (make-string (window-body-width) ?─) 'face '(:foreground "#234768"))
            (propertize "\n" 'face nil)
-           (propertize "╭⟢ " 'face '(:foreground "#A2DEB2"))
+           (propertize "╭⟢" 'face '(:foreground "#A2DEB2"))
+           (propertize " " 'face nil)
            (propertize (user-login-name) 'face '(:foreground "#5DC078"))
            (propertize "@" 'face '(:foreground "#0057FF"))
            (propertize (system-name) 'face '(:foreground "#0083FF"))
-           (propertize " " 'face nil)
-           (propertize (display-git-prompt-branch) 'face '(:foreground "#F1F5F9")) ""
            (propertize " ⯌ " 'face nil)
+           (propertize "￨" 'face '(:foreground "#74CAFF"))
            (propertize (pwd-shorten-dirs (abbreviate-file-name (eshell/pwd)))
                        'face '(:foreground "#74CAFF"))
+           (propertize " ⯌ " 'face nil)
+           (propertize (display-git-prompt-branch) 'face '(:foreground "#A2DEB2"))
            (propertize "\n" 'face nil)
            (propertize "╰🡢" 'face '(:foreground "#A2DEB2"))
            (propertize " " 'face nil))))
 
-  ;; Set this to match eshell-prompt-function
-  (setq eshell-prompt-regexp "^╰🡢 ")
+  (setq eshell-highlight-prompt nil)
 
-  ;; define portable aliases
-  (setq eshell-command-aliases-list ())
+    ;; Set this to match eshell-prompt-function
+    (setq eshell-prompt-regexp "^╰🡢 ")
 
-  (defun +alias (al cmd)
-    "handy wrapper function to convert alias symbols to alias
-      strings to avoid writing 4 quotes per alias. AL is a single-word
-      symbol naming the alias, CMD is a list symbol describing the
-      command."
-    (add-to-list 'eshell-command-aliases-list
-                 (list (symbol-name al)
-                       (mapconcat 'symbol-name cmd " "))))
+    ;; define portable aliases
+    (setq eshell-command-aliases-list ())
 
-  ;; actual aliases
-  (+alias 'l      '(ls -laF))
-  (+alias 'll     '(ls -l))
-  (+alias 'la     '(ls -a))
-  (+alias 'lt     '(ls -ltr $*))
-  (+alias '..     '(cd ..))
-  (+alias '...    '(cd ../..))
-  (+alias '....   '(cd ../../..))
-  (+alias '.....  '(cd ../../../..))
-  (+alias 'md     '(mkdir -p))
-  (+alias 'emacs  '(find-file $1))
-  (+alias 'less   '(find-file-read-only $1))
+    (defun +alias (al cmd)
+      "handy wrapper function to convert alias symbols to alias
+        strings to avoid writing 4 quotes per alias. AL is a single-word
+        symbol naming the alias, CMD is a list symbol describing the
+        command."
+      (add-to-list 'eshell-command-aliases-list
+                   (list (symbol-name al)
+                         (mapconcat 'symbol-name cmd " "))))
 
-  ;; Docker
-  (+alias 'd '(docker $*))
-  (+alias 'dc '(docker-compose $*))
-  (+alias 'dm '(docker-machine $*))
+    ;; actual aliases
+    (+alias 'l      '(ls -laF))
+    (+alias 'll     '(ls -l))
+    (+alias 'la     '(ls -a))
+    (+alias 'lt     '(ls -ltr $*))
+    (+alias '..     '(cd ..))
+    (+alias '...    '(cd ../..))
+    (+alias '....   '(cd ../../..))
+    (+alias '.....  '(cd ../../../..))
+    (+alias 'md     '(mkdir -p))
+    (+alias 'emacs  '(find-file $1))
+    (+alias 'less   '(find-file-read-only $1))
 
-  ;; HTTPie
-  (+alias 'https '(http --default-scheme=https $*))
+    ;; Docker
+    (+alias 'd '(docker $*))
+    (+alias 'dc '(docker-compose $*))
+    (+alias 'dm '(docker-machine $*))
+
+    ;; HTTPie
+    (+alias 'https '(http --default-scheme=https $*))
 #+END_SRC
 * Shell configurations
 Preprocess commands sent to shell prompt and
