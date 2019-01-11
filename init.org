@@ -43,6 +43,11 @@
     :commands (magit-status)
     :bind ("C-x g" . magit-status))
 #+END_SRC
+* TODO Custom file
+#+BEGIN_SRC emacs-lisp
+  (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+  (load custom-file)
+#+END_SRC
 * TODO Don't as about custom variables
 * TODO Make source code blocks default to ~emacs-lisp~
 
