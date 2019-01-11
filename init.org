@@ -1,13 +1,13 @@
 #+PROPERTY: header-args :tangle yes :comments yes :results silent
 
-* UI Tweaks
+* TODO UI Tweaks
 #+BEGIN_SRC emacs-lisp
   (menu-bar-mode -1)
 #+END_SRC
 
-* DONE Package manager / Use Package
+* DONE Package manager/Use-Package
 [[help:list-packages][Help for list packages]]
-** Adding more package-archives and Install use-package
+** DONE Adding more package-archives and Install use-package
 #+BEGIN_SRC emacs-lisp
   (require 'package)
   (add-to-list 'package-archives
@@ -33,7 +33,7 @@
 ** DONE Command Log mode
 #+BEGIN_SRC emacs-lisp
   (use-package command-log-mode
-    :commands (global-command-log-mode)
+    :config (global-command-log-mode)
     :bind ("C-c o" . clm/toggle-command-log-buffer))
 #+END_SRC
 * TODO Magit
@@ -48,6 +48,20 @@
   (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
   (load custom-file)
 #+END_SRC
+* TODO Spelling/Linting
+** DONE Flyspell
+#+BEGIN_SRC emacs-lisp
+  (use-package flyspell
+    :hook ((prog-mode . flyspell-prog-mode)
+	   (text-mode . flyspell-mode)))
+#+END_SRC
+** TODO Flycheck
+#+BEGIN_SRC emacs-lisp
+  (use-package flycheck
+    :ensure t
+    :hook ((prog-mode . flycheck-mode)))
+#+END_SRC
+*** TODO Don't complain in org-mode elisp snippets
 * TODO Don't as about custom variables
 * TODO Make source code blocks default to ~emacs-lisp~
 
