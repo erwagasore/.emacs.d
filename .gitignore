@@ -18,3 +18,5 @@ eshell/
 url/
 /nov-places
 init.el
+/custom.el*
+init.el*

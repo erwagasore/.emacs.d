@@ -22,9 +22,11 @@
     (package-refresh-contents)
     (package-install 'use-package))
 #+END_SRC
-** DONE configure use-package
+* DONE Environment variables
 #+BEGIN_SRC emacs-lisp
-  (setq use-package-always-ensure t)
+  (use-package exec-path-from-shell
+    :ensure t
+    :config (exec-path-from-shell-initialize))
 #+END_SRC
 * TODO Figlet / Other demo staff
 ** TODO Figlet
