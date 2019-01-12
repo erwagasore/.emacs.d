@@ -60,6 +60,8 @@
   (add-to-list 'package-archives
 	       '("melpa" . "https://melpa.org/packages/") t)
   (add-to-list 'package-archives
+	       '("gnu" . "http://elpa.gnu.org/packages/"))
+  (add-to-list 'package-archives
 	       '("org" . "https://orgmode.org/elpa/") t)
   (package-initialize)
 
@@ -546,6 +548,17 @@
 #+begin_src emacs-lisp
   (use-package json-mode
     :init (setq js-indent-level 2))
+#+end_src
+** TODO DOCKER
+#+begin_src emacs-lisp
+  (use-package dockerfile-mode
+    :ensure t)
+
+  (use-package docker-compose-mode
+    :ensure t)
+
+  (use-package docker-tramp
+    :ensure t)
 #+end_src
 ** TODO WEB
 #+begin_src emacs-lisp
