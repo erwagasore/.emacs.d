@@ -725,17 +725,3 @@
 # Local variables:
 # eval: (add-hook 'after-save-hook (lambda nil (org-babel-tangle)) nil t)
 # End:
-# #+begin_src emacs-lisp
-  (use-package counsel
-    :ensure t
-    :config
-    (use-package smex :ensure t)
-    (use-package flx :ensure t)
-    (ivy-mode t)
-    (setq ivy-use-virtual-buffers t)
-    ;; intentional space before end of string
-    (setq ivy-count-format "(%d/%d) ")
-    (setq ivy-initial-inputs-alist nil)
-    (setq ivy-re-builders-alist '((t . ivy--regex-fuzzy)))
-    :bind ("\C-x\C-m" . counsel-M-x))
-#+end_src
