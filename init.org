@@ -1,12 +1,57 @@
 #+PROPERTY: header-args :tangle yes :comments yes :results silent
 
-* TODO UI Tweaks
-#+BEGIN_SRC emacs-lisp
+* DONE SANE DEFAULTS
+** DONE Better defaults
+#+begin_src emacs-lisp
+  ;; remove default menu bar
   (menu-bar-mode -1)
-#+END_SRC
 
-* DONE Package manager/Use-Package
-[[help:list-packages][Help for list packages]]
+  ;; disable these GUI based behaviors
+  (when window-system
+    (scroll-bar-mode -1)
+    (tool-bar-mode -1)
+    (tooltip-mode -1))
+
+  ;; delete selected text on-type
+  (delete-selection-mode t)
+
+  ;; disable and customize startup message
+  (setq inhibit-startup-message t
+	initial-scratch-message ";; Happy Hacking\n")
+
+  ;; make identical buffer names unique
+  (setq uniquify-buffer-name-style 'reverse
+	uniquify-separator "|"
+	uniquify-after-kill-buffer-p t
+	uniquify-ignore-buffers-re "^\\*")
+
+  ;; use a different file for custom configurations
+  (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+    (load custom-file)
+
+  ;; define alias to answering just 'y' or 'n' instead
+  (defalias 'yes-or-no-p 'y-or-n-p)  
+#+end_src
+** DONE Bindings
+#+begin_src emacs-lisp
+  ;; dependable keybindings
+  (global-set-key (kbd "C-c l") #'goto-line)
+  (global-set-key (kbd "\C-c n") #'rename-buffer)
+  (global-set-key (kbd "<C-s-return>") #'toggle-frame-fullscreen)
+#+end_src
+
+* DONE MAC CONFIGURATION
+#+begin_src emacs-lisp
+  ;; Don't make new frames when opening a new file with Emacs
+  (setq ns-pop-up-frames nil)
+
+  ;; enable transparent titlebar with dark-mode
+  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+  (add-to-list 'default-frame-alist '(ns-appearance . dark))
+  (setq ns-use-proxy-icon  nil
+	frame-title-format nil)
+#+end_src
+* DONE PACKAGE MANAGEMENT
 ** DONE Adding more package-archives and Install use-package
 #+BEGIN_SRC emacs-lisp
   (require 'package)
@@ -22,50 +67,307 @@
     (package-refresh-contents)
     (package-install 'use-package))
 #+END_SRC
-* DONE Environment variables
-#+BEGIN_SRC emacs-lisp
-  (use-package exec-path-from-shell
+* DONE APPEARANCE
+** DONE Visual & Theme
+#+begin_src emacs-lisp
+  ;; define the font family and size
+  (set-frame-font "PragmataPro 15" nil t)
+
+  ;; Using ~M-x all-the-icons-fonts~ you can install the fonts
+  (use-package all-the-icons
     :ensure t
-    :config (exec-path-from-shell-initialize))
-#+END_SRC
-* TODO Figlet / Other demo staff
-** TODO Figlet
-** DONE Command Log mode
-#+BEGIN_SRC emacs-lisp
-  (use-package command-log-mode
-    :config (global-command-log-mode)
-    :bind ("C-c o" . clm/toggle-command-log-buffer))
-#+END_SRC
-* TODO Magit
-** Installing Magit
-#+BEGIN_SRC emacs-lisp
-  (use-package magit
-    :commands (magit-status)
-    :bind ("C-x g" . magit-status))
-#+END_SRC
-* TODO Custom file
-#+BEGIN_SRC emacs-lisp
-  (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-  (load custom-file)
-#+END_SRC
-* TODO Spelling/Linting
-** DONE Flyspell
+    :config (setq inhibit-compacting-font-caches t))
+
+  (use-package doom-themes
+    :ensure t
+    :init (load-theme 'doom-one t)
+    :config
+    (doom-themes-visual-bell-config)
+    (doom-themes-org-config))
+
+  (use-package doom-modeline
+    :ensure t
+    :defer t
+    :hook (after-init . doom-modeline-init))
+
+#+end_src
+** DONE Cursor styling
+#+begin_src emacs-lisp
+  (setq-default cursor-type '(bar . 1) blink-cursor-delay 0 blink-cursor-interval 0.4)
+
+  ;; flashes the cursor's line when you scroll
+  (use-package beacon
+    :ensure t
+    :config
+    (beacon-mode t)
+    (setq beacon-color "#0057FF"))
+#+end_src
+** DONE Environment variables
+ #+BEGIN_SRC emacs-lisp
+   (use-package exec-path-from-shell
+     :if (memq window-system '(mac ns))
+     :ensure t
+     :config (exec-path-from-shell-initialize))
+ #+END_SRC
+* TODO LINTING/SPELLING
+*** DONE Flyspell
 #+BEGIN_SRC emacs-lisp
   (use-package flyspell
     :hook ((prog-mode . flyspell-prog-mode)
 	   (text-mode . flyspell-mode)))
 #+END_SRC
-** TODO Flycheck
+*** TODO Flycheck
 #+BEGIN_SRC emacs-lisp
-  (use-package flycheck
-    :ensure t
-    :hook ((prog-mode . flycheck-mode)))
+    (use-package flycheck
+      :ensure t
+      :hook ((prog-mode . flycheck-mode))
+      :config
+      (setq flycheck-python-flake8-executable "flake8")
+      (setq flycheck-highlighting-mode 'lines))
 #+END_SRC
 *** TODO Don't complain in org-mode elisp snippets
-* TODO Don't as about custom variables
-* TODO Make source code blocks default to ~emacs-lisp~
+* TODO FIGLET & OTHER UTILS
+*** TODO Figlet
+*** DONE Command Log mode
+#+BEGIN_SRC emacs-lisp
+  (use-package command-log-mode
+    :config (global-command-log-mode)
+    :bind ("C-c o" . clm/toggle-command-log-buffer))
+#+END_SRC
 
-* Local Variables
+* TODO COMPANY
+#+begin_src emacs-lisp
+  (use-package company
+    :ensure t
+    :config
+    (progn 
+      (setq company-idle-delay 0.3
+	    company-tooltip-limit 20
+	    company-minimum-prefix-length 2
+	    company-echo-delay 0
+	    company-dabbrev-downcase nil)
+    
+      (add-hook 'after-init-hook 'global-company-mode)
+
+      (eval-after-load 'company
+	`(let (( Map  company-active-map))
+	   (define-key company-active-map (kbd "\C-n") 'company-select-next)
+	   (define-key company-active-map (kbd "\C-n") 'company-select-next)
+	   (define-key company-active-map (kbd "\C-p") 'company-select-previous)
+	   (define-key company-active-map (kbd "\C-d") 'company-show-doc-buffer)
+	   (define-key company-active-map (kbd "<tab>") 'company-complete)))))
+#+end_src
+* TODO MAJOR MODES
+** TODO IDO
+#+begin_src emacs-lisp
+  (use-package ido
+    :bind ("C-x C-b" . ido-switch-buffer)
+    :init
+    (setq ido-enable-flex-matching t
+	  ido-everywhere t)
+    (ido-mode t)
+
+    (use-package ido-vertical-mode
+      :ensure t
+      :defer t
+      :init
+      (ido-vertical-mode t)
+      (setq ido-vertical-define-keys 'C-n-and-C-p-only)))
+#+end_src
+** TODO SMEX
+#+begin_src emacs-lisp
+  (defun cached-smex ()
+    "Convert previous commands into keywords"
+    (interactive)
+    (or (boundp 'smex-cache)
+	(smex-initialize)) (smex))
+
+  (use-package smex
+    :ensure t
+    :bind ("\C-x\C-m" . cached-smex))
+#+end_src
+** TODO ANZU
+#+begin_src emacs-lisp
+  (use-package anzu
+    :ensure t
+    :config
+    (global-anzu-mode t)
+    (global-set-key [remap query-replace-regexp] 'anzu-query-replace-regexp)
+    (global-set-key [remap query-replace] 'anzu-query-replace))
+#+end_src
+** TODO PARINFER
+#+begin_src emacs-lisp
+  (use-package parinfer
+    :ensure t
+    :bind (("C-," . parinfer-toggle-mode))
+    :init
+    (progn
+      (setq parinfer-extensions
+	    '(defaults       ; should be included.
+	       pretty-parens  ; different paren styles for different modes.
+	       smart-tab      ; C-b & C-f jump positions and smart shift with tab & S-tab.
+	       smart-yank))   ; Yank behavior depend on mode.
+      (add-hook 'clojure-mode-hook #'parinfer-mode)
+      (add-hook 'emacs-lisp-mode-hook #'parinfer-mode)
+      (add-hook 'lisp-mode-hook #'parinfer-mode)))
+#+end_src
+** TODO WHICH-KEY
+#+begin_src emacs-lisp
+  ;; Which Key
+  (use-package which-key
+    :ensure t
+    :init
+    (setq which-key-separator " ")
+    (setq which-key-prefix-prefix "+")
+    :config (which-key-mode))
+#+end_src
+** TODO ORG
+*** DONE Get the newest version of org-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package org
+    :pin org
+    :ensure org-plus-contrib
+    :config (setq
+	     org-src-fontify-natively t
+	     org-src-tab-acts-natively t
+	     org-todo-keywords '((sequence "BACKLOG(b)" "TODO(t)" "DOING(n)" "|" "DONE(d)")
+				       (sequence "|"  "ONHOLD(h)" "CANCELED(c)"))))
+#+END_SRC
+** TODO REST-CLIENT
+#+begin_src emacs-lisp
+  (use-package restclient-mode
+    :defer 5
+    :config (add-hook 'restclient-mode-hook 'company-restclient))
+
+  (use-package company-restclient
+    :ensure t
+    :config
+    (progn
+      (add-hook 'restclient-mode-hook
+		(lambda ()
+		  (set (make-local-variable 'company-backends)'(company-restclient))
+		  (company-mode t)))))
+
+  (use-package ob-restclient
+    :ensure t
+    :config 
+    (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
+#+end_src
+** DONE MAGIT
+*** Installing Magit
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :commands (magit-status)
+    :bind ("C-x g" . magit-status))
+#+END_SRC
+** TODO GITGUTTER
+#+begin_src emacs-lisp
+  (if (display-graphic-p)
+      (use-package git-gutter-fringe
+	:ensure t
+	:init (global-git-gutter-mode))
+    (use-package git-gutter
+      :ensure t
+      :init (global-git-gutter-mode)))
+#+end_src
+** TODO MARKDOWN
+#+begin_src emacs-lisp
+  (use-package markdown-mode
+    :ensure t
+    :mode (("\\.markdown\\'" . markdown-mode)
+	   ("\\.md\\'"       . markdown-mode)))
+#+end_src
+** TODO JSON
+#+begin_src emacs-lisp
+  (use-package json-mode
+    :init (setq js-indent-level 2))
+#+end_src
+** TODO EPUB
+#+begin_src emacs-lisp
+  (use-package nov
+    :ensure t
+    :mode ("\\.epub\\'" . nov-mode)
+    :config (progn
+	      (setq nov-text-width 80)
+	      (setq nov-variable-pitch nil)))
+#+end_src
+#+begin_src emacs-lisp
+  (use-package json-mode
+    :init (setq js-indent-level 2))
+#+end_src
+** TODO WEB
+#+begin_src emacs-lisp
+  (use-package web-mode
+    :ensure t
+    :config
+    (add-to-list 'auto-mode-alist '("\\.js[x]?\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.mdx?\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+  
+    (setq web-mode-content-types-alist '(("jsx" . "\\.js[x]?\\'")))
+    (setq web-mode-code-indent-offset 2)
+    (setq web-mode-attr-indent-offset 2)
+    (setq web-mode-markup-indent-offset 2))
+#+end_src
+** TODO RUST
+#+begin_src emacs-lisp
+  (use-package rust-mode
+    :ensure t)
+
+  (use-package cargo
+    :ensure t
+    :config
+    (add-hook 'rust-mode-hook 'cargo-minor-mode))
+
+  (use-package racer
+    :ensure t
+    :config
+    (progn
+      (add-hook 'rust-mode-hook #'racer-mode)
+      (add-hook 'racer-mode-hook #'eldoc-mode)
+      (add-hook 'racer-mode-hook #'company-mode)))
+
+  (use-package flycheck-rust
+    :ensure t
+    :config
+    (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+#+end_src
+** TODO PYTHON
+#+begin_src emacs-lisp
+  ;; enable eldoc mode for python files
+  (add-hook 'python-mode-hook 'eldoc-mode)
+
+  (use-package anaconda-mode
+    :ensure t
+    :config (add-hook 'python-mode-hook 'anaconda-mode))
+
+  (use-package company-anaconda
+    :ensure t
+    :config
+    (eval-after-load "company" '(add-to-list 'company-backends 'company-anaconda)))
+
+  (use-package pyenv-mode
+    :ensure t
+    :config (pyenv-mode))
+
+  (use-package pyenv-mode-auto
+     :ensure t)
+#+end_src
+* DONE Local Variables
 # Local variables:
-# eval: (add-hook 'after-save-hook (lambda () (org-babel-tangle)) nil t)
+# eval: (add-hook 'after-save-hook (lambda nil (org-babel-tangle)) nil t)
 # End:
+# #+begin_src emacs-lisp
+  (use-package counsel
+    :ensure t
+    :config
+    (use-package smex :ensure t)
+    (use-package flx :ensure t)
+    (ivy-mode t)
+    (setq ivy-use-virtual-buffers t)
+    ;; intentional space before end of string
+    (setq ivy-count-format "(%d/%d) ")
+    (setq ivy-initial-inputs-alist nil)
+    (setq ivy-re-builders-alist '((t . ivy--regex-fuzzy)))
+    :bind ("\C-x\C-m" . counsel-M-x))
+#+end_src
