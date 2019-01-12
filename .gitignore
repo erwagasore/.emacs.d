@@ -17,3 +17,7 @@ anaconda-mode
 eshell/
 url/
 /nov-places
+/custom.el*
+/init.el*
+/ido.*
+/recentf
