@@ -464,6 +464,15 @@
     (setq which-key-prefix-prefix "+")
     :config (which-key-mode))
 #+end_src
+** TODO TEXT-SCALING
+#+begin_src emacs-lisp
+  ;; font scaling
+  (use-package default-text-scale
+    :ensure t
+    :config
+    (global-set-key (kbd "C-s-=") 'default-text-scale-increase)
+    (global-set-key (kbd "C-s--") 'default-text-scale-decrease))
+#+end_src
 ** TODO ORG
 *** DONE Get the newest version of org-mode
 #+BEGIN_SRC emacs-lisp
