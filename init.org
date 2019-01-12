@@ -605,6 +605,109 @@
   (use-package pyenv-mode-auto
      :ensure t)
 #+end_src
+** TODO ESHELL
+#+begin_src emacs-lisp
+  (use-package eshell
+    :init
+    (setq
+     eshell-banner-message ""
+     eshell-hist-ignoredups t
+     eshell-error-if-no-glob t
+     eshell-cmpl-ignore-case t
+     eshell-save-history-on-exit t
+     eshell-prefer-lisp-functions nil
+     eshell-destroy-buffer-when-process-dies t
+     eshell-scroll-to-bottom-on-input 'all)
+    :config
+    (defun eshell/clear ()
+      "Clear eshell buffer"
+      (interactive)
+      (let ((inhibit-read-only t)) (erase-buffer))))
+
+  (defun git-prompt-branch-name ()
+    "Get current git branch name"
+    (let ((args '("symbolic-ref" "HEAD" "--short")))
+      (with-temp-buffer
+	(apply #'process-file "git" nil (list t nil) nil args)
+	(unless (bobp)
+	  (goto-char (point-min))
+	  (buffer-substring-no-properties (point) (line-end-position))))))
+
+  ;; FIXME there should be a better way to have this done in the top function
+  (defun display-git-prompt-branch ()
+    (if (not (null (git-prompt-branch-name))) (concat "￨" (git-prompt-branch-name)) ""))
+
+  (defun get-first-char (str)
+    (if (zerop (length str)) "" (substring str 0 1)))
+
+  (defun pwd-shorten-dirs (pwd)
+    "Shorten all directory names in PWD except the last two."
+    (let ((path-items (split-string pwd "/")))
+      (if (> (length path-items) 2)
+	  (concat
+	   (mapconcat 'get-first-char (butlast path-items 2) "/")
+	   "/"
+	   (mapconcat (lambda (item) item) (last path-items 2) "/"))
+	pwd)))
+
+  (setq eshell-prompt-function
+	(lambda nil
+	  (concat
+	   (propertize (make-string (window-body-width) ?─) 'face '(:foreground "#234768"))
+	   (propertize "\n" 'face nil)
+	   (propertize "╭⟢" 'face '(:foreground "#A2DEB2"))
+	   (propertize " " 'face nil)
+	   (propertize (user-login-name) 'face '(:foreground "#5DC078"))
+	   (propertize "@" 'face '(:foreground "#0057FF"))
+	   (propertize (system-name) 'face '(:foreground "#0083FF"))
+	   (propertize " ⯌ " 'face nil)
+	   (propertize "￨" 'face '(:foreground "#74CAFF"))
+	   (propertize (pwd-shorten-dirs (abbreviate-file-name (eshell/pwd)))
+		       'face '(:foreground "#74CAFF"))
+	   (propertize " ⯌ " 'face nil)
+	   (propertize (display-git-prompt-branch) 'face '(:foreground "#A2DEB2"))
+	   (propertize "\n" 'face nil)
+	   (propertize "╰🡢" 'face '(:foreground "#A2DEB2"))
+	   (propertize " " 'face nil))))
+
+  (setq eshell-highlight-prompt nil)
+
+    ;; Set this to match eshell-prompt-function
+    (setq eshell-prompt-regexp "^╰🡢 ")
+
+    ;; define portable aliases
+    (setq eshell-command-aliases-list ())
+
+    (defun +alias (al cmd)
+      "handy wrapper function to convert alias symbols to alias
+	strings to avoid writing 4 quotes per alias. AL is a single-word
+	symbol naming the alias, CMD is a list symbol describing the
+	command."
+      (add-to-list 'eshell-command-aliases-list
+		   (list (symbol-name al)
+			 (mapconcat 'symbol-name cmd " "))))
+
+    ;; actual aliases
+    (+alias 'l      '(ls -laF))
+    (+alias 'll     '(ls -l))
+    (+alias 'la     '(ls -a))
+    (+alias 'lt     '(ls -ltr $*))
+    (+alias '..     '(cd ..))
+    (+alias '...    '(cd ../..))
+    (+alias '....   '(cd ../../..))
+    (+alias '.....  '(cd ../../../..))
+    (+alias 'md     '(mkdir -p))
+    (+alias 'emacs  '(find-file $1))
+    (+alias 'less   '(find-file-read-only $1))
+
+    ;; Docker
+    (+alias 'd '(docker $*))
+    (+alias 'dc '(docker-compose $*))
+    (+alias 'dm '(docker-machine $*))
+
+    ;; HTTPie
+    (+alias 'https '(http --default-scheme=https $*))
+#+end_src
 * DONE Local Variables
 # Local variables:
 # eval: (add-hook 'after-save-hook (lambda nil (org-babel-tangle)) nil t)
