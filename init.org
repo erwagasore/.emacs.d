@@ -721,7 +721,7 @@
     ;; HTTPie
     (+alias 'https '(http --default-scheme=https $*))
 #+end_src
-* DONE Local Variables
+* COMMENT Local Variables
 # Local variables:
 # eval: (add-hook 'after-save-hook (lambda nil (org-babel-tangle)) nil t)
 # End:
