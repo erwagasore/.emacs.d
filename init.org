@@ -311,7 +311,9 @@
 ** DONE Visual & Theme
 #+begin_src emacs-lisp
   ;; define the font family and size
-  (set-frame-font "PragmataPro 15" nil t)
+  (set-frame-font "Pragmatapro 15" nil t)
+  (setq-default line-spacing 5)
+  (global-hl-line-mode t)
 
   ;; Using ~M-x all-the-icons-fonts~ you can install the fonts
   (use-package all-the-icons
@@ -329,7 +331,6 @@
     :ensure t
     :defer t
     :hook (after-init . doom-modeline-init))
-
 #+end_src
 ** DONE Cursor styling
 #+begin_src emacs-lisp
@@ -398,33 +399,40 @@
 	   (define-key company-active-map (kbd "<tab>") 'company-complete)))))
 #+end_src
 * TODO MAJOR MODES
-** TODO IDO
+** TODO IVY / COUNSEL / SWIPER
 #+begin_src emacs-lisp
-  (use-package ido
-    :bind ("C-x C-b" . ido-switch-buffer)
-    :init
-    (setq ido-enable-flex-matching t
-	  ido-everywhere t)
-    (ido-mode t)
-
-    (use-package ido-vertical-mode
-      :ensure t
-      :defer t
-      :init
-      (ido-vertical-mode t)
-      (setq ido-vertical-define-keys 'C-n-and-C-p-only)))
-#+end_src
-** TODO SMEX
-#+begin_src emacs-lisp
-  (defun cached-smex ()
-    "Convert previous commands into keywords"
-    (interactive)
-    (or (boundp 'smex-cache)
-	(smex-initialize)) (smex))
-
-  (use-package smex
+  (use-package ivy
     :ensure t
-    :bind ("\C-x\C-m" . cached-smex))
+    :init (ivy-mode t)
+    :config
+    (setq ivy-count-format ""
+	  ivy-re-builders-alist '((t   . ivy--regex-ignore-order))
+	  ivy-initial-inputs-alist nil
+	  ivy-extra-directories nil
+	  ivy-height 8
+	  ivy-re-builders-alist
+	  '((swiper . ivy--regex-plus)
+	    (t      . ivy--regex-fuzzy))))
+
+  (use-package counsel
+    :ensure t
+    :bind (("M-x" . counsel-M-x)
+	   ("C-x C-m" . counsel-M-x)))
+
+  (use-package swiper
+    :ensure t
+    :bind (("C-s" . swiper)))
+
+  (use-package all-the-icons-ivy
+    :ensure t
+    :config
+    (all-the-icons-ivy-setup))
+
+  (use-package ivy-explorer
+    :ensure t
+    :config
+    (ivy-explorer-mode t))
+
 #+end_src
 ** TODO ANZU
 #+begin_src emacs-lisp
@@ -485,7 +493,8 @@
 	     org-src-fontify-natively t
 	     org-src-tab-acts-natively t
 	     org-todo-keywords '((sequence "BACKLOG(b)" "TODO(t)" "DOING(n)" "|" "DONE(d)")
-				       (sequence "|"  "ONHOLD(h)" "CANCELED(c)"))))
+				 (sequence "|"  "ONHOLD(h)" "CANCELED(c)"))
+	     org-agenda-files '("~/.org/agenda.org")))
 #+END_SRC
 ** TODO REST-CLIENT
 #+begin_src emacs-lisp
