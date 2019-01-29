@@ -1,3 +1,4 @@
+
 #+PROPERTY: header-args :tangle yes :comments yes :results silent
 
 * DONE SANE DEFAULTS
@@ -5,6 +6,9 @@
 #+begin_src emacs-lisp
   ;; remove default menu bar
   (menu-bar-mode -1)
+
+  ;; disable backup
+  (setq make-backup-files nil)
 
   ;; disable these GUI based behaviors
   (when window-system
@@ -345,10 +349,29 @@
 #+end_src
 ** DONE Environment variables
  #+BEGIN_SRC emacs-lisp
+   (defun exec-envvars-from-file (file &optional ignore-env)
+     (with-temp-buffer
+       (insert-file-contents file)
+       (remove nil
+	 (mapcar
+	  (lambda (x)
+	    (if (string-prefix-p "# " x) nil
+	      (let
+		  ((ignore (upcase ignore-env))
+		   (key-val (split-string x "=" t "\"")))
+		(if (string= (car key-val) ignore)
+		    nil
+		  (setenv (car key-val) (cadr key-val))
+		  key-val)))) (split-string (buffer-string) "\n" t "export ")))))
+
+   ;; get all bash environment variables except PATH
+   (exec-envvars-from-file "~/build/dotfiles/bash/env" "PATH")
+
    (use-package exec-path-from-shell
      :if (memq window-system '(mac ns))
      :ensure t
-     :config (exec-path-from-shell-initialize))
+     :config
+     (exec-path-from-shell-initialize))
  #+END_SRC
 * TODO LINTING/SPELLING
 *** DONE Flyspell
@@ -382,7 +405,7 @@
     :ensure t
     :config
     (progn 
-      (setq company-idle-delay 0.3
+      (setq company-idle-delay 0.2
 	    company-tooltip-limit 20
 	    company-minimum-prefix-length 2
 	    company-echo-delay 0
@@ -431,7 +454,8 @@
   (use-package ivy-explorer
     :ensure t
     :config
-    (ivy-explorer-mode t))
+    (ivy-explorer-mode t)
+    (counsel-mode t))
 
 #+end_src
 ** TODO ANZU
