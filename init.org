@@ -1,4 +1,3 @@
-
 #+PROPERTY: header-args :tangle yes :comments yes :results silent
 
 * DONE SANE DEFAULTS
@@ -578,10 +577,6 @@
 	      (setq nov-text-width 80)
 	      (setq nov-variable-pitch nil)))
 #+end_src
-#+begin_src emacs-lisp
-  (use-package json-mode
-    :init (setq js-indent-level 2))
-#+end_src
 ** TODO DOCKER
 #+begin_src emacs-lisp
   (use-package dockerfile-mode
@@ -644,12 +639,9 @@
     :config
     (eval-after-load "company" '(add-to-list 'company-backends 'company-anaconda)))
 
-  (use-package pyenv-mode
+  (use-package pipenv
     :ensure t
-    :config (pyenv-mode))
-
-  (use-package pyenv-mode-auto
-     :ensure t)
+    :hook (python-mode . pipenv-mode))
 #+end_src
 ** TODO ESHELL
 #+begin_src emacs-lisp
