@@ -662,7 +662,7 @@
       (interactive)
       (let ((inhibit-read-only t))
 	(erase-buffer)
-	(if (= eshell-exit-success-p 0) (message ":)") (message ":(")))))
+	(if (eshell-exit-success-p) (message ":)") (message ":(")))))
 
   (defun git-prompt-branch-name ()
     "Get current git branch name"
