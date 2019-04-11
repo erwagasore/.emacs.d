@@ -79,6 +79,7 @@
     (package-install 'use-package))
 
   (use-package auto-package-update
+    :ensure t
     :config
     (setq auto-package-update-delete-old-versions t)
     (setq auto-package-update-hide-results t)
@@ -696,6 +697,9 @@
   (defun get-first-char (str)
     (if (zerop (length str)) "" (substring str 0 1)))
 
+  (defun fill-window-with-char ()
+    (make-string (window-body-width) ?_))
+
   (defun pwd-shorten-dirs (pwd)
     "Shorten all directory names in PWD except the last two."
     (let ((path-items (split-string pwd "/")))
@@ -709,7 +713,7 @@
   (setq eshell-prompt-function
 	(lambda nil
 	  (concat
-	   (propertize (make-string (window-body-width) ?─) 'face '(:foreground "#234768"))
+	   (propertize (fill-window-with-char) 'face '(:foreground "#234768"))
 	   (propertize "\n" 'face nil)
 	   (propertize "╭⟢" 'face '(:foreground "#A2DEB2"))
 	   (propertize " " 'face nil)
@@ -728,41 +732,41 @@
 
   (setq eshell-highlight-prompt nil)
 
-    ;; Set this to match eshell-prompt-function
-    (setq eshell-prompt-regexp "^╰🡢 ")
+  ;; Set this to match eshell-prompt-function
+  (setq eshell-prompt-regexp "^╰🡢 ")
 
-    ;; define portable aliases
-    (setq eshell-command-aliases-list ())
+  ;; define portable aliases
+  (setq eshell-command-aliases-list ())
 
-    (defun +alias (al cmd)
-      "handy wrapper function to convert alias symbols to alias
-	strings to avoid writing 4 quotes per alias. AL is a single-word
-	symbol naming the alias, CMD is a list symbol describing the
-	command."
-      (add-to-list 'eshell-command-aliases-list
-		   (list (symbol-name al)
-			 (mapconcat 'symbol-name cmd " "))))
+  (defun +alias (al cmd)
+    "handy wrapper function to convert alias symbols to alias
+	  strings to avoid writing 4 quotes per alias. AL is a single-word
+	  symbol naming the alias, CMD is a list symbol describing the
+	  command."
+    (add-to-list 'eshell-command-aliases-list
+		 (list (symbol-name al)
+		       (mapconcat 'symbol-name cmd " "))))
 
-    ;; actual aliases
-    (+alias 'l      '(ls -laF))
-    (+alias 'll     '(ls -l))
-    (+alias 'la     '(ls -a))
-    (+alias 'lt     '(ls -ltr $*))
-    (+alias '..     '(cd ..))
-    (+alias '...    '(cd ../..))
-    (+alias '....   '(cd ../../..))
-    (+alias '.....  '(cd ../../../..))
-    (+alias 'md     '(mkdir -p))
-    (+alias 'emacs  '(find-file $1))
-    (+alias 'less   '(find-file-read-only $1))
+  ;; actual aliases
+  (+alias 'l      '(ls -laF))
+  (+alias 'll     '(ls -l))
+  (+alias 'la     '(ls -a))
+  (+alias 'lt     '(ls -ltr $*))
+  (+alias '..     '(cd ..))
+  (+alias '...    '(cd ../..))
+  (+alias '....   '(cd ../../..))
+  (+alias '.....  '(cd ../../../..))
+  (+alias 'md     '(mkdir -p))
+  (+alias 'emacs  '(find-file $1))
+  (+alias 'less   '(find-file-read-only $1))
 
-    ;; Docker
-    (+alias 'd '(docker $*))
-    (+alias 'dc '(docker-compose $*))
-    (+alias 'dm '(docker-machine $*))
+  ;; Docker
+  (+alias 'd '(docker $*))
+  (+alias 'dc '(docker-compose $*))
+  (+alias 'dm '(docker-machine $*))
 
-    ;; HTTPie
-    (+alias 'https '(http --default-scheme=https $*))
+  ;; HTTPie
+  (+alias 'https '(http --default-scheme=https $*))
 #+end_src
 * COMMENT Local Variables
 # Local variables:
