@@ -22,3 +22,5 @@ url/
 /ido.*
 /recentf
 /.*
+/clear
+/transient/*
