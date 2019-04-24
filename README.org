@@ -46,7 +46,7 @@
   ;; dependable keybindings
   (global-set-key (kbd "C-c l") #'goto-line)
   (global-set-key (kbd "\C-c n") #'rename-buffer)
-  (global-set-key (kbd "<C-M-return>") #'toggle-frame-fullscreen)
+  ;; (global-set-key (kbd "<C-M-return>") #'toggle-frame-fullscreen)
 #+end_src
 
 * DONE MAC CONFIGURATION
