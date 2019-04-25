@@ -46,7 +46,7 @@
   ;; dependable keybindings
   (global-set-key (kbd "C-c l") #'goto-line)
   (global-set-key (kbd "\C-c n") #'rename-buffer)
-  ;; (global-set-key (kbd "<C-M-return>") #'toggle-frame-fullscreen)
+  (global-set-key (kbd "<C-s-return>") #'toggle-frame-fullscreen)
 #+end_src
 
 * DONE MAC CONFIGURATION
@@ -95,7 +95,6 @@
 	    1 font-lock-warning-face t))))
 
   (add-hook 'prog-mode-hook 'watchwords)
-  (mac-auto-operator-composition-mode t)
   ;;(setq prettify-symbols-unprettify-at-point 'right-edge)
   ;;(global-prettify-symbols-mode t)
 #+end_src
@@ -103,7 +102,9 @@
 #+begin_src emacs-lisp
   ;; define the font family and size
 
-  (set-frame-font "PragmataPro Liga-14" nil t)
+  (set-frame-font "PragmataPro-15" nil t)
+  (load-file "~/.emacs.d/pragmatapro-lig.el")
+  (pragmatapro-lig-global-mode t)
   (setq-default line-spacing 5)
   (global-hl-line-mode t)
 
