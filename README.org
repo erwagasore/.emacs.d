@@ -410,7 +410,7 @@
   (use-package cargo
     :ensure t
     :config
-    (add-hook 'rust-mode-hook 'cargo-minor-mode))
+    (add-hook 'rust-mode-hook #'cargo-minor-mode))
 
   (use-package racer
     :ensure t
