@@ -469,7 +469,7 @@
 
   (require 'magit)
   (defun display-git-prompt-branch ()
-    (if (not (null (git-prompt-branch-name))) (concat "￨" (magit-get-current-branch)) ""))
+    (if (not (null (magit-get-current-branch))) (concat "￨" (magit-get-current-branch)) ""))
 
   (defun get-first-char (str)
     (if (zerop (length str)) "" (substring str 0 1)))
