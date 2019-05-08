@@ -51,6 +51,12 @@
 
 * DONE MAC CONFIGURATION
 #+begin_src emacs-lisp
+  ;; set bash environment variables
+  (use-package exec-path-from-shell
+    :if (memq window-system '(mac ns))
+    :ensure t
+    :config (exec-path-from-shell-initialize))
+
   ;; Don't make new frames when opening a new file with Emacs
   (setq ns-pop-up-frames nil)
 
@@ -61,7 +67,6 @@
 	frame-title-format nil)
 #+end_src
 * DONE PACKAGE MANAGEMENT
-** DONE Adding more package-archives and Install use-package
 #+BEGIN_SRC emacs-lisp
   (require 'package)
   (add-to-list 'package-archives
@@ -88,26 +93,22 @@
 * DONE APPEARANCE
 ** TODO Font & text rendering
 #+begin_src emacs-lisp
-  (defun watchwords ()
-    "Convert words mentioned below into keywords."
-    (font-lock-add-keywords
-     nil '(("\\<\\(FIXIT\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\|NOCOMMIT\\)"
-	    1 font-lock-warning-face t))))
-
-  (add-hook 'prog-mode-hook 'watchwords)
-  ;;(setq prettify-symbols-unprettify-at-point 'right-edge)
-  ;;(global-prettify-symbols-mode t)
-#+end_src
-** DONE Visual & Theme
-#+begin_src emacs-lisp
   ;; define the font family and size
-
   (set-frame-font "PragmataPro-15" nil t)
   (load-file "~/.emacs.d/pragmatapro-lig.el")
   (pragmatapro-lig-global-mode t)
   (setq-default line-spacing 5)
   (global-hl-line-mode t)
 
+  (defun watchwords ()
+    "Convert words mentioned below into keywords."
+    (font-lock-add-keywords
+     nil '(("\\<\\(FIXIT\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\|NOCOMMIT\\)"
+	    1 font-lock-warning-face t))))
+  (add-hook 'prog-mode-hook 'watchwords)
+#+end_src
+** DONE Visual & Theme
+#+begin_src emacs-lisp
   ;; Using ~M-x all-the-icons-fonts~ you can install the fonts
   (use-package all-the-icons
     :ensure t
@@ -136,40 +137,14 @@
     (beacon-mode t)
     (setq beacon-color "#0057FF"))
 #+end_src
-** DONE Environment variables
- #+BEGIN_SRC emacs-lisp
-   (defun exec-envvars-from-file (file &optional ignore-env)
-     (with-temp-buffer
-       (insert-file-contents file)
-       (remove nil
-	 (mapcar
-	  (lambda (x)
-	    (if (string-prefix-p "# " x) nil
-	      (let
-		  ((ignore (upcase ignore-env))
-		   (key-val (split-string x "=" t "\"")))
-		(if (string= (car key-val) ignore)
-		    nil
-		  (setenv (car key-val) (cadr key-val))
-		  key-val)))) (split-string (buffer-string) "\n" t "export ")))))
-
-   ;; get all bash environment variables except PATH
-   (exec-envvars-from-file "~/build/dotfiles/bash/env" "PATH")
-
-   (use-package exec-path-from-shell
-     :if (memq window-system '(mac ns))
-     :ensure t
-     :config
-     (exec-path-from-shell-initialize))
- #+END_SRC
 * TODO LINTING/SPELLING
-*** DONE Flyspell
+** DONE Flyspell
 #+BEGIN_SRC emacs-lisp
   (use-package flyspell
     :hook ((prog-mode . flyspell-prog-mode)
 	   (text-mode . flyspell-mode)))
 #+END_SRC
-*** TODO Flycheck
+** TODO Flycheck
 #+BEGIN_SRC emacs-lisp
     (use-package flycheck
       :ensure t
@@ -178,16 +153,17 @@
       (setq flycheck-python-flake8-executable "flake8")
       (setq flycheck-highlighting-mode 'lines))
 #+END_SRC
-*** TODO Don't complain in org-mode elisp snippets
-* TODO FIGLET & OTHER UTILS
-*** TODO Figlet
-*** DONE Command Log mode
-#+BEGIN_SRC emacs-lisp
-  (use-package command-log-mode
-    :config (global-command-log-mode)
-    :bind ("C-c o" . clm/toggle-command-log-buffer))
-#+END_SRC
-
+* TODO EGLOT
+  #+begin_src emacs-lisp
+    (use-package eglot
+      :ensure t
+      :commands (eglot eglot-ensure)
+      :hook ((rust-mode python-mode dart-mode) . eglot-ensure)
+      :config
+      ;; fix column calculation when ligatures are used
+      (setq eglot-current-column-function 'eglot-lsp-abiding-column)
+      (general-define-key :keymap 'eglot-mode-map "C-h ." 'eglot-help-at-point))
+  #+end_src
 * TODO COMPANY
 #+begin_src emacs-lisp
   (use-package company
@@ -210,14 +186,6 @@
 	   (define-key company-active-map (kbd "\C-d") 'company-show-doc-buffer)
 	   (define-key company-active-map (kbd "<tab>") 'company-complete)))))
 #+end_src
-* TODO EGLOT
-  #+begin_src emacs-lisp
-    (use-package eglot
-      :ensure t)
-
-    (use-package dart-mode
-      :ensure t)
-  #+end_src
 * TODO MAJOR MODES
 ** TODO IVY / COUNSEL / SWIPER
 #+begin_src emacs-lisp
@@ -419,33 +387,11 @@
     :ensure t
     :config
     (add-hook 'rust-mode-hook #'cargo-minor-mode))
-
-  (use-package racer
-    :ensure t
-    :config
-    (progn
-      (add-hook 'rust-mode-hook #'racer-mode)
-      (add-hook 'racer-mode-hook #'eldoc-mode)
-      (add-hook 'racer-mode-hook #'company-mode)))
-
-  (use-package flycheck-rust
-    :ensure t
-    :config
-    (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 #+end_src
 ** TODO PYTHON
 #+begin_src emacs-lisp
-  ;; enable eldoc mode for python files
-  (add-hook 'python-mode-hook 'eldoc-mode)
-
-  (use-package anaconda-mode
-    :ensure t
-    :config (add-hook 'python-mode-hook 'anaconda-mode))
-
-  (use-package company-anaconda
-    :ensure t
-    :config
-    (eval-after-load "company" '(add-to-list 'company-backends 'company-anaconda)))
+  (use-package python-mode
+    :ensure t)
 
   (use-package pyenv-mode
     :ensure t)
@@ -455,6 +401,8 @@
 #+end_src
 ** TODO FLUTTER
    #+begin_src emacs-lisp
+     (use-package dart-mode
+       :ensure t)
    #+end_src
 ** TODO ESHELL
 #+begin_src emacs-lisp
