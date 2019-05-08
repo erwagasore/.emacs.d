@@ -210,6 +210,14 @@
 	   (define-key company-active-map (kbd "\C-d") 'company-show-doc-buffer)
 	   (define-key company-active-map (kbd "<tab>") 'company-complete)))))
 #+end_src
+* TODO EGLOT
+  #+begin_src emacs-lisp
+    (use-package eglot
+      :ensure t)
+
+    (use-package dart-mode
+      :ensure t)
+  #+end_src
 * TODO MAJOR MODES
 ** TODO IVY / COUNSEL / SWIPER
 #+begin_src emacs-lisp
@@ -445,6 +453,9 @@
   (use-package pyenv-mode-auto
     :ensure t)
 #+end_src
+** TODO FLUTTER
+   #+begin_src emacs-lisp
+   #+end_src
 ** TODO ESHELL
 #+begin_src emacs-lisp
   (use-package eshell
