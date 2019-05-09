@@ -48,24 +48,6 @@
   (global-set-key (kbd "\C-c n") #'rename-buffer)
   (global-set-key (kbd "<C-s-return>") #'toggle-frame-fullscreen)
 #+end_src
-
-* DONE MAC CONFIGURATION
-#+begin_src emacs-lisp
-  ;; set bash environment variables
-  (use-package exec-path-from-shell
-    :if (memq window-system '(mac ns))
-    :ensure t
-    :config (exec-path-from-shell-initialize))
-
-  ;; Don't make new frames when opening a new file with Emacs
-  (setq ns-pop-up-frames nil)
-
-  ;; enable transparent titlebar with dark-mode
-  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-  (add-to-list 'default-frame-alist '(ns-appearance . dark))
-  (setq ns-use-proxy-icon  nil
-	frame-title-format nil)
-#+end_src
 * DONE PACKAGE MANAGEMENT
 #+BEGIN_SRC emacs-lisp
   (require 'package)
@@ -90,6 +72,25 @@
     (setq auto-package-update-hide-results t)
     (auto-package-update-maybe))
 #+END_SRC
+
+* DONE MAC CONFIGURATION
+#+begin_src emacs-lisp
+  ;; set bash environment variables
+  (use-package exec-path-from-shell
+    :ensure t
+    :if (memq window-system '(mac ns))
+    :ensure t
+    :config (exec-path-from-shell-initialize))
+
+  ;; Don't make new frames when opening a new file with Emacs
+  (setq ns-pop-up-frames nil)
+
+  ;; enable transparent titlebar with dark-mode
+  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+  (add-to-list 'default-frame-alist '(ns-appearance . dark))
+  (setq ns-use-proxy-icon  nil
+	frame-title-format nil)
+#+end_src
 * DONE APPEARANCE
 ** TODO Font & text rendering
 #+begin_src emacs-lisp
@@ -146,23 +147,22 @@
 #+END_SRC
 ** TODO Flycheck
 #+BEGIN_SRC emacs-lisp
-    (use-package flycheck
-      :ensure t
-      :hook ((prog-mode . flycheck-mode))
-      :config
-      (setq flycheck-python-flake8-executable "flake8")
-      (setq flycheck-highlighting-mode 'lines))
+  (use-package flycheck
+    :ensure t
+    :hook ((prog-mode . flycheck-mode))
+    :config
+    (setq flycheck-python-flake8-executable "flake8")
+    (setq flycheck-highlighting-mode 'lines))
 #+END_SRC
 * TODO EGLOT
   #+begin_src emacs-lisp
     (use-package eglot
       :ensure t
       :commands (eglot eglot-ensure)
-      :hook ((rust-mode python-mode dart-mode) . eglot-ensure)
+      :hook ((rust-mode python-mode dart-mode typescript-mode javascript-mode) . eglot-ensure)
       :config
       ;; fix column calculation when ligatures are used
-      (setq eglot-current-column-function 'eglot-lsp-abiding-column)
-      (general-define-key :keymap 'eglot-mode-map "C-h ." 'eglot-help-at-point))
+      (setq eglot-current-column-function 'eglot-lsp-abiding-column))
   #+end_src
 * TODO COMPANY
 #+begin_src emacs-lisp
@@ -387,6 +387,11 @@
     :ensure t
     :config
     (add-hook 'rust-mode-hook #'cargo-minor-mode))
+
+  (use-package flycheck-rust
+    :ensure t
+    :after (rust-mode)
+    :hook ((flycheck-mode . flycheck-rust-setup)))
 #+end_src
 ** TODO PYTHON
 #+begin_src emacs-lisp
@@ -398,6 +403,11 @@
 
   (use-package pyenv-mode-auto
     :ensure t)
+
+  (use-package blacken
+    :ensure t
+    :after (python)
+    :hook ((python-mode . blacken-mode)))
 #+end_src
 ** TODO FLUTTER
    #+begin_src emacs-lisp
