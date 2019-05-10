@@ -1,6 +1,6 @@
 #+PROPERTY: header-args :tangle init.el :comments yes :results silent
 
-* DONE SANE DEFAULTS
+* SANE DEFAULTS
 ** DONE Better defaults
 #+begin_src emacs-lisp
   ;; remove default menu bar
@@ -48,7 +48,7 @@
   (global-set-key (kbd "\C-c n") #'rename-buffer)
   (global-set-key (kbd "<C-s-return>") #'toggle-frame-fullscreen)
 #+end_src
-* DONE PACKAGE MANAGEMENT
+* PACKAGE MANAGEMENT
 #+BEGIN_SRC emacs-lisp
   (require 'package)
   (add-to-list 'package-archives
@@ -73,7 +73,7 @@
     (auto-package-update-maybe))
 #+END_SRC
 
-* DONE MAC CONFIGURATION
+* MAC CONFIGURATION
 #+begin_src emacs-lisp
   ;; set bash environment variables
   (use-package exec-path-from-shell
@@ -91,7 +91,7 @@
   (setq ns-use-proxy-icon  nil
 	frame-title-format nil)
 #+end_src
-* DONE APPEARANCE
+* APPEARANCE
 ** TODO Font & text rendering
 #+begin_src emacs-lisp
   ;; define the font family and size
@@ -138,7 +138,7 @@
     (beacon-mode t)
     (setq beacon-color "#0057FF"))
 #+end_src
-* TODO LINTING/SPELLING
+* LINTING & SPELLING
 ** DONE Flyspell
 #+BEGIN_SRC emacs-lisp
   (use-package flyspell
@@ -154,7 +154,7 @@
     (setq flycheck-python-flake8-executable "flake8")
     (setq flycheck-highlighting-mode 'lines))
 #+END_SRC
-* TODO EGLOT
+* EGLOT
   #+begin_src emacs-lisp
     (use-package eglot
       :ensure t
@@ -164,7 +164,7 @@
       ;; fix column calculation when ligatures are used
       (setq eglot-current-column-function 'eglot-lsp-abiding-column))
   #+end_src
-* TODO COMPANY
+* COMPANY
 #+begin_src emacs-lisp
   (use-package company
     :ensure t
@@ -186,7 +186,87 @@
 	   (define-key company-active-map (kbd "\C-d") 'company-show-doc-buffer)
 	   (define-key company-active-map (kbd "<tab>") 'company-complete)))))
 #+end_src
-* TODO MAJOR MODES
+* CLI CLIENTS
+** MAGIT
+*** Installing Magit
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :ensure t
+    :commands (magit-status)
+    :bind ("C-x g" . magit-status))
+#+END_SRC
+** TODO GITGUTTER
+#+begin_src emacs-lisp
+  (if (display-graphic-p)
+      (use-package git-gutter-fringe
+	:ensure t
+	:init (global-git-gutter-mode))
+    (use-package git-gutter
+      :ensure t
+      :init (global-git-gutter-mode)))
+#+end_src
+** TODO DOCKER
+#+begin_src emacs-lisp
+  (use-package dockerfile-mode
+    :ensure t)
+
+  (use-package docker-compose-mode
+    :ensure t)
+
+  (use-package docker-tramp
+    :ensure t)
+#+end_src
+** TODO REST-CLIENT
+#+begin_src emacs-lisp
+  (use-package restclient-mode
+    :defer 5
+    :config (add-hook 'restclient-mode-hook 'company-restclient))
+
+  (use-package company-restclient
+    :ensure t
+    :config
+    (progn
+      (add-hook 'restclient-mode-hook
+		(lambda ()
+		  (set (make-local-variable 'company-backends)'(company-restclient))
+		  (company-mode t)))))
+
+  (use-package ob-restclient
+    :ensure t
+    :config 
+    (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
+#+end_src
+* WRITING & READING
+** TODO EPUB
+#+begin_src emacs-lisp
+  (use-package nov
+    :ensure t
+    :mode ("\\.epub\\'" . nov-mode)
+    :config (progn
+	      (setq nov-text-width 80)
+	      (setq nov-variable-pitch nil)))
+#+end_src
+** TODO ORG
+*** DONE Get the newest version of org-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package org
+    :pin org
+    :ensure org-plus-contrib
+    :config (setq
+	     org-src-fontify-natively t
+	     org-src-tab-acts-natively t
+	     org-todo-keywords '((sequence "BACKLOG(b)" "TODO(t)" "DOING(n)" "|" "DONE(d)")
+				 (sequence "|"  "ONHOLD(h)" "CANCELED(c)"))
+	     org-agenda-files '("~/.org/agenda.org")))
+#+END_SRC
+** TODO MARKDOWN
+#+begin_src emacs-lisp
+  (use-package markdown-mode
+    :ensure t
+    :mode (("\\.markdown\\'" . markdown-mode)
+	   ("\\.md\\'"       . markdown-mode)))
+#+end_src
+* MAJOR MODES
 ** TODO IVY / COUNSEL / SWIPER
 #+begin_src emacs-lisp
   (use-package ivy
@@ -272,127 +352,7 @@
     (global-set-key (kbd "C-s-=") 'default-text-scale-increase)
     (global-set-key (kbd "C-s--") 'default-text-scale-decrease))
 #+end_src
-** TODO ORG
-*** DONE Get the newest version of org-mode
-#+BEGIN_SRC emacs-lisp
-  (use-package org
-    :pin org
-    :ensure org-plus-contrib
-    :config (setq
-	     org-src-fontify-natively t
-	     org-src-tab-acts-natively t
-	     org-todo-keywords '((sequence "BACKLOG(b)" "TODO(t)" "DOING(n)" "|" "DONE(d)")
-				 (sequence "|"  "ONHOLD(h)" "CANCELED(c)"))
-	     org-agenda-files '("~/.org/agenda.org")))
-#+END_SRC
-** TODO REST-CLIENT
-#+begin_src emacs-lisp
-  (use-package restclient-mode
-    :defer 5
-    :config (add-hook 'restclient-mode-hook 'company-restclient))
-
-  (use-package company-restclient
-    :ensure t
-    :config
-    (progn
-      (add-hook 'restclient-mode-hook
-		(lambda ()
-		  (set (make-local-variable 'company-backends)'(company-restclient))
-		  (company-mode t)))))
-
-  (use-package ob-restclient
-    :ensure t
-    :config 
-    (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
-#+end_src
-** DONE MAGIT
-*** Installing Magit
-#+BEGIN_SRC emacs-lisp
-  (use-package magit
-    :ensure t
-    :commands (magit-status)
-    :bind ("C-x g" . magit-status))
-#+END_SRC
-** TODO GITGUTTER
-#+begin_src emacs-lisp
-  (if (display-graphic-p)
-      (use-package git-gutter-fringe
-	:ensure t
-	:init (global-git-gutter-mode))
-    (use-package git-gutter
-      :ensure t
-      :init (global-git-gutter-mode)))
-#+end_src
-** TODO MARKDOWN
-#+begin_src emacs-lisp
-  (use-package markdown-mode
-    :ensure t
-    :mode (("\\.markdown\\'" . markdown-mode)
-	   ("\\.md\\'"       . markdown-mode)))
-#+end_src
-** TODO TYPESCRIPT
-   #+begin_src emacs-lisp
-     (use-package typescript-mode
-       :ensure t
-       :mode (("\\.ts\\'" . typescript-mode)
-	      ("\\.tsx\\'" . typescript-mode)))
-   #+end_src
-** TODO JSON
-#+begin_src emacs-lisp
-  (use-package json-mode
-    :ensure t
-    :defer t
-    :mode "\\.json$")
-#+end_src
-** TODO EPUB
-#+begin_src emacs-lisp
-  (use-package nov
-    :ensure t
-    :mode ("\\.epub\\'" . nov-mode)
-    :config (progn
-	      (setq nov-text-width 80)
-	      (setq nov-variable-pitch nil)))
-#+end_src
-** TODO DOCKER
-#+begin_src emacs-lisp
-  (use-package dockerfile-mode
-    :ensure t)
-
-  (use-package docker-compose-mode
-    :ensure t)
-
-  (use-package docker-tramp
-    :ensure t)
-#+end_src
-** TODO WEB
-#+begin_src emacs-lisp
-  (use-package web-mode
-    :ensure t
-    :config
-    (add-to-list 'auto-mode-alist '("\\.js[x]?\\'" . web-mode))
-    (add-to-list 'auto-mode-alist '("\\.mdx?\\'" . web-mode))
-    (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-  
-    (setq web-mode-content-types-alist '(("jsx" . "\\.js[x]?\\'")))
-    (setq web-mode-code-indent-offset 2)
-    (setq web-mode-attr-indent-offset 2)
-    (setq web-mode-markup-indent-offset 2))
-#+end_src
-** TODO RUST
-#+begin_src emacs-lisp
-  (use-package rust-mode
-    :ensure t)
-
-  (use-package cargo
-    :ensure t
-    :config
-    (add-hook 'rust-mode-hook #'cargo-minor-mode))
-
-  (use-package flycheck-rust
-    :ensure t
-    :after (rust-mode)
-    :hook ((flycheck-mode . flycheck-rust-setup)))
-#+end_src
+* LANGUAGES
 ** TODO PYTHON
 #+begin_src emacs-lisp
   (use-package python-mode
@@ -409,12 +369,55 @@
     :after (python)
     :hook ((python-mode . blacken-mode)))
 #+end_src
-** TODO FLUTTER
+** TODO RUST
+#+begin_src emacs-lisp
+  (use-package rust-mode
+    :ensure t)
+
+  (use-package cargo
+    :ensure t
+    :config
+    (add-hook 'rust-mode-hook #'cargo-minor-mode))
+
+  (use-package flycheck-rust
+    :ensure t
+    :after (rust-mode)
+    :hook ((flycheck-mode . flycheck-rust-setup)))
+#+end_src
+** TODO DART
    #+begin_src emacs-lisp
      (use-package dart-mode
        :ensure t)
    #+end_src
-** TODO ESHELL
+** TODO WEB
+#+begin_src emacs-lisp
+  (use-package web-mode
+    :ensure t
+    :config
+    (add-to-list 'auto-mode-alist '("\\.js[x]?\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.mdx?\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+  
+    (setq web-mode-content-types-alist '(("jsx" . "\\.js[x]?\\'")))
+    (setq web-mode-code-indent-offset 2)
+    (setq web-mode-attr-indent-offset 2)
+    (setq web-mode-markup-indent-offset 2))
+#+end_src
+** TODO JSON
+#+begin_src emacs-lisp
+  (use-package json-mode
+    :ensure t
+    :defer t
+    :mode "\\.json$")
+#+end_src
+** TODO TYPESCRIPT
+   #+begin_src emacs-lisp
+     (use-package typescript-mode
+       :ensure t
+       :mode (("\\.ts\\'" . typescript-mode)
+	      ("\\.tsx\\'" . typescript-mode)))
+   #+end_src
+* ESHELL
 #+begin_src emacs-lisp
   (use-package eshell
     :init
