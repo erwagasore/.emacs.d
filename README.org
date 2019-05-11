@@ -1,11 +1,18 @@
 #+PROPERTY: header-args :tangle init.el :comments yes :results silent
-* UI TWEAKS
+* BUMP GARBAGE COLLECTION
+  #+begin_src emacs-lisp
+    ;; Make startup faster by reducing the frequency of garbage
+    ;; collection.  The default is 800 kilobytes.  Measured in bytes.
+    (setq gc-cons-threshold (* 50 1000 1000))
+  #+end_src
+* UI CLEANUP
    #+begin_src emacs-lisp
      ;; remove default menu bar
      (menu-bar-mode -1)
 
-     ;; always highlighting active line
-     (global-hl-line-mode t)
+     ;; disable electric pair and show parent
+     (electric-pair-mode -1)
+     (show-paren-mode -1)
 
      ;; hide both frame title bar and the icon
      (setq ns-use-proxy-icon  -1
@@ -20,97 +27,7 @@
      ;; disable and customize startup message
      (setq inhibit-startup-message 1
 	   initial-scratch-message ";; Happy Hacking\n")
-
-     ;; make identical buffer names unique
-     (setq uniquify-buffer-name-style 'reverse
-	   uniquify-separator "|"
-	   uniquify-after-kill-buffer-p t
-	   uniquify-ignore-buffers-re "^\\*")
    #+end_src
-
-* OTHER DEFAULTS
-   #+begin_src emacs-lisp
-     ;; disable backup
-     (setq make-backup-files -1)
-
-     ;; delete selected text on-type
-     (delete-selection-mode 1)
-
-     ;; define alias to answering just 'y' or 'n' instead
-     (defalias 'yes-or-no-p 'y-or-n-p)
-
-     ;; Don't make new frames when opening a new file with Emacs
-     (setq ns-pop-up-frames nil)
-
-     ;; Suppress warning
-     (setq ad-redefinition-action 'accept)
-
-     ;; activate column-number-mode
-     (column-number-mode 1)
-     (setq-default indicate-buffer-boundaries 'right)
-
-     ;; define abbrev file
-     (setq abbrev-file-name (expand-file-name "abbrev.el" user-emacs-directory))
-     (unless (file-exists-p abbrev-file-name)
-       (write-region "" "" abbrev-file-name))
-     ;; (load abbrev-file-name)
-
-     ;; define custom file
-     (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-     (unless (file-exists-p custom-file)
-       (write-region "" "" custom-file))
-     (load custom-file)
-   #+end_src
-* GLOBAL BINDINGS
-#+begin_src emacs-lisp
-  ;; dependable keybindings
-  (global-set-key (kbd "C-c l") #'goto-line)
-  (global-set-key (kbd "\C-c n") #'rename-buffer)
-  (global-set-key (kbd "<C-s-return>") #'toggle-frame-fullscreen)
-#+end_src
-* PACKAGE MANAGER
-  #+begin_src emacs-lisp
-    (require 'package)
-
-    ;; define package manager mirros
-    (add-to-list 'package-archives
-		 '("melpa-stable" . "https://stable.melpa.org/packages/") t)
-    (add-to-list 'package-archives
-	   '("melpa" . "https://melpa.org/packages/") t)
-    (add-to-list 'package-archives
-	   '("org" . "https://orgmode.org/elpa/") t)
-
-    ;; initialize defined mirrors
-    (package-initialize)
-
-    ;; refresh packages from mirrors
-    ;; install use-package if not already installed
-    (unless (package-installed-p 'use-package)
-      (package-refresh-contents)
-      (package-install 'use-package))
-    (require 'use-package)
-    ;; authorize use package to have ensure set to true by default
-    (setq use-package-always-ensure t)
-
-    ;; automatically update packages
-    ; delete old packages, don't bother showing the results
-    (use-package auto-package-update
-      :config
-      (setq auto-package-update-delete-old-versions t
-	    auto-package-update-hide-results t)
-      (auto-package-update-maybe))
-  #+end_src
-* MAC CONFIGS
-  #+begin_src emacs-lisp
-    ;; set bash environment variables
-    (use-package exec-path-from-shell
-      :if (memq window-system '(mac ns))
-      :config (exec-path-from-shell-initialize))
-
-    ;; enable transparent titlebar with dark-mode
-    (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-    (add-to-list 'default-frame-alist '(ns-appearance . dark))
-#+end_src
 * TEXT RENDERING
   #+begin_src emacs-lisp
     ;; define the font family and size
@@ -126,25 +43,121 @@
       (font-lock-add-keywords
        nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|HACK\\|REFACTOR\\|NOCOMMIT\\)"
 	      1 font-lock-warning-face t))))
-
     (add-hook 'prog-mode-hook 'watchwords)
   #+end_src
+* PACKAGE MANAGER
+  #+begin_src emacs-lisp
+    (require 'package)
+
+    ;; define package manager mirros
+    (add-to-list 'package-archives
+		 '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+    (add-to-list 'package-archives
+	   '("melpa" . "https://melpa.org/packages/") t)
+    (add-to-list 'package-archives
+	   '("org" . "https://orgmode.org/elpa/") t)
+    ;; initialize defined mirrors
+    (package-initialize)
+
+    ;; update the package metadata is the local cache is missing
+    (unless package-archive-contents
+      (package-refresh-contents))
+
+    ;; refresh packages from mirrors
+    ;; install use-package if not already installed
+    (unless (package-installed-p 'use-package)
+      (package-install 'use-package))
+    (require 'use-package)
+
+    ;; automatically update packages
+    ; delete old packages, don't bother showing the results
+    (use-package auto-package-update
+      :defer 2
+      :config
+      (setq auto-package-update-delete-old-versions t
+	    auto-package-update-hide-results t)
+      (auto-package-update-maybe))
+  #+end_src
+* MAC CONFIGS
+  #+begin_src emacs-lisp
+    ;; enable transparent titlebar with dark-mode
+    (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+    (add-to-list 'default-frame-alist '(ns-appearance . dark))
+#+end_src
 * THEMING
   #+begin_src emacs-lisp
-    ;; Using ~M-x all-the-icons-fonts~ you can install the fonts
-    (use-package all-the-icons
-      :config (setq inhibit-compacting-font-caches t))
-
+    ; Using ~M-x all-the-icons-fonts~ you can install the fonts
     (use-package doom-themes
-      :init (load-theme 'doom-one t)
+      :ensure t
       :config
+      (load-theme 'doom-one t)
       (doom-themes-visual-bell-config)
       (doom-themes-org-config))
 
     (use-package doom-modeline
-      :defer t
+      :defer 1
       :hook (after-init . doom-modeline-init))
+
+    (use-package all-the-icons
+      :defer 2
+      :config (setq inhibit-compacting-font-caches t))
   #+end_src
+* UX CLEANUP
+  #+begin_src emacs-lisp
+    ;; disable backup
+    (setq make-backup-files -1)
+
+    ;; Don't make new frames when opening a new file with Emacs
+    (setq ns-pop-up-frames -1)
+
+    ;; define alias to answering just 'y' or 'n' instead
+    (defalias 'yes-or-no-p 'y-or-n-p)
+
+    ;; Highlight the current line
+    (use-package hl-line
+      :ensure nil
+      :hook (after-init . global-hl-line-mode))
+
+    ;; nice scrolling
+    (setq scroll-margin 0
+	  scroll-conservatively 100000
+	  scroll-preserve-screen-position 1)
+
+    ;; make buffer name unique with style
+    (use-package uniquify
+      :defer 3
+      :config
+      (setq uniquify-buffer-name-style 'reverse
+	    uniquify-separator "|"
+	    uniquify-after-kill-buffer-p 1
+	    uniquify-ignore-buffers-re "^\\*"))
+  #+end_src
+* OTHER DEFAULTS
+   #+begin_src emacs-lisp
+     ;; activate column-number-mode
+     (column-number-mode 1)
+     (setq-default indicate-buffer-boundaries 'right)
+
+     ;; set bash environment variables
+     (use-package exec-path-from-shell
+       :if (memq window-system '(mac ns))
+       :config (exec-path-from-shell-initialize))
+
+     ;; define abbrev file
+     (setq abbrev-file-name (expand-file-name "abbrev.el" user-emacs-directory))
+     (unless (file-exists-p abbrev-file-name)
+       (write-region "" "" abbrev-file-name))
+
+     ;; supress some warning
+     (setq ad-redefinition-action 'accept)
+   #+end_src
+* GLOBAL BINDINGS
+#+begin_src emacs-lisp
+  ;; dependable keybindings
+  (global-set-key (kbd "C-c l") #'goto-line)
+  (global-set-key (kbd "\C-c n") #'rename-buffer)
+  (global-set-key (kbd "<C-s-return>") #'toggle-frame-fullscreen)
+#+end_src
 * CURSOR STYLING
 #+begin_src emacs-lisp
   (setq-default cursor-type '(bar . 1)
@@ -153,33 +166,23 @@
 
   ;; flashes the cursor's line switched buffer
   (use-package beacon
+    :defer 5
     :config
     (beacon-mode t)
     (setq beacon-color "#0057FF"))
 #+end_src
-* LINTING & SPELLING
-** DONE Flyspell
-#+BEGIN_SRC emacs-lisp
-  ;; (use-package flyspell
-  ;;   :hook ((prog-mode . flyspell-prog-mode)
-  ;; 	 (text-mode . flyspell-mode))
-  ;;   :config
-  ;;   (setq ispell-program-name (executable-find "hunspell"))
-  ;;   (setq ispell-local-dictionary "en_GB")
-  ;;   (flyspell-mode 1))
-#+END_SRC
-** TODO Flycheck
-#+BEGIN_SRC emacs-lisp
-  (use-package flycheck
-    :hook ((prog-mode . flycheck-mode))
-    :config
-    (setq flycheck-python-flake8-executable "flake8")
-    (setq flycheck-highlighting-mode 'lines))
-#+END_SRC
+* FLYCHECK
+  #+begin_src emacs-lisp
+    (use-package flycheck
+      :defer 5
+      :hook ((prog-mode . flycheck-mode))
+      :config
+      (setq flycheck-highlighting-mode 'lines))
+  #+end_src
 * EGLOT
   #+begin_src emacs-lisp
     (use-package eglot
-      :ensure t
+      :defer 5
       :commands (eglot eglot-ensure)
       :hook ((rust-mode python-mode dart-mode typescript-mode javascript-mode) . eglot-ensure)
       :config
@@ -189,7 +192,7 @@
 * COMPANY
 #+begin_src emacs-lisp
   (use-package company
-    :ensure t
+    :defer 5
     :config
     (progn 
       (setq company-idle-delay 0.2
@@ -212,36 +215,39 @@
 ** MAGIT
    #+BEGIN_SRC emacs-lisp
      (use-package magit
+       :defer 5
        :init (magit-auto-revert-mode -1)
        :bind ("C-x g" . magit-status))
 #+END_SRC
-** TODO GITGUTTER
+** GITGUTTER
 #+begin_src emacs-lisp
   (if (display-graphic-p)
       (use-package git-gutter-fringe
-	:ensure t
+	:defer 5
 	:init (global-git-gutter-mode))
     (use-package git-gutter
-      :ensure t
+      :defer 5
       :init (global-git-gutter-mode)))
 #+end_src
-** TODO DOCKER
+** DOCKER
 #+begin_src emacs-lisp
   (use-package dockerfile-mode
-    :ensure t)
+    :defer 5)
 
   (use-package docker-compose-mode
-    :ensure t)
+    :defer 5)
 
   (use-package docker-tramp
-    :ensure t)
+    :defer 5)
 #+end_src
-** TODO REST-CLIENT
+** REST-CLIENT
 #+begin_src emacs-lisp
   (use-package restclient
+    :defer 5
     :config (add-hook 'restclient-mode-hook 'company-restclient))
 
   (use-package company-restclient
+    :defer 5
     :config
     (progn
       (add-hook 'restclient-mode-hook
@@ -250,21 +256,21 @@
 		  (company-mode t)))))
 
   (use-package ob-restclient
+    :defer 5
     :config 
     (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
 #+end_src
 * WRITING & READING
-** TODO EPUB
+** EPUB
 #+begin_src emacs-lisp
   (use-package nov
-    :ensure t
+    :defer 5
     :mode ("\\.epub\\'" . nov-mode)
     :config (progn
 	      (setq nov-text-width 80)
 	      (setq nov-variable-pitch nil)))
 #+end_src
-** TODO ORG
-*** DONE Get the newest version of org-mode
+** ORG
 #+BEGIN_SRC emacs-lisp
   (use-package org
     :pin org
@@ -276,18 +282,18 @@
 				 (sequence "|"  "ONHOLD(h)" "CANCELED(c)"))
 	     org-agenda-files '("~/.org/agenda.org")))
 #+END_SRC
-** TODO MARKDOWN
+** MARKDOWN
 #+begin_src emacs-lisp
   (use-package markdown-mode
-    :ensure t
+    :defer 5
     :mode (("\\.markdown\\'" . markdown-mode)
 	   ("\\.md\\'"       . markdown-mode)))
 #+end_src
 * MAJOR MODES
-** TODO IVY / COUNSEL / SWIPER
+** IVY / COUNSEL / SWIPER
 #+begin_src emacs-lisp
   (use-package ivy
-    :ensure t
+    :defer 5
     :init (ivy-mode t)
     :config
     (setq ivy-count-format ""
@@ -309,39 +315,37 @@
     :bind (("C-s" . swiper)))
 
   (use-package all-the-icons-ivy
-    :ensure t
+    :defer 5
     :config
     (all-the-icons-ivy-setup))
 
   (use-package ivy-explorer
-    :ensure t
+    :defer 5
     :config
     (ivy-explorer-mode t)
     (counsel-mode t))
 
 #+end_src
-** TODO ANZU
+** ANZU
 #+begin_src emacs-lisp
   (use-package anzu
-    :ensure t
+    :defer 5
     :config
     (global-anzu-mode t)
     (global-set-key [remap query-replace-regexp] 'anzu-query-replace-regexp)
     (global-set-key [remap query-replace] 'anzu-query-replace))
 #+end_src
-** TODO WHITESPACE
+** WHITESPACE
 #+begin_src emacs-lisp
   (use-package whitespace
+    :defer 5
     :bind ("\C-c w" . whitespace-mode))
 #+end_src
-** TODO PARINFER
+** PARINFER
 #+begin_src emacs-lisp
-  ;; disable electric pair and show parent
-  (electric-pair-mode -1)
-  (show-paren-mode -1)
-
   ;; favor smartparens instead
   (use-package smartparens
+    :defer 5
     :config
     (require 'smartparens-config)
     (show-smartparens-global-mode 1)
@@ -349,7 +353,7 @@
 
   ;; parinfer is the best especially with lisp dialects
   (use-package parinfer
-    :ensure t
+    :defer 5
     :bind (("C-," . parinfer-toggle-mode))
     :init
     (progn
@@ -362,33 +366,33 @@
       (add-hook 'emacs-lisp-mode-hook #'parinfer-mode)
       (add-hook 'lisp-mode-hook #'parinfer-mode)))
 #+end_src
-** TODO WHICH-KEY
+** WHICH-KEY
 #+begin_src emacs-lisp
   ;; Which Key
   (use-package which-key
-    :ensure t
+    :defer 5
     :init
     (setq which-key-separator " ")
     (setq which-key-prefix-prefix "+")
     :config (which-key-mode))
 #+end_src
-** TODO TEXT-SCALING
+** TEXT-SCALING
 #+begin_src emacs-lisp
   ;; font scaling
   (use-package default-text-scale
-    :ensure t
+    :defer 5
     :config
     (global-set-key (kbd "C-s-=") 'default-text-scale-increase)
     (global-set-key (kbd "C-s--") 'default-text-scale-decrease))
 #+end_src
-** TODO PROJECTILE
+** PROJECTILE
    #+begin_src emacs-lisp
      (use-package projectile
-       :ensure t
+       :defer 5
        :bind-keymap ("C-c p" . projectile-command-map)
        :config (projectile-mode 1)
        (use-package counsel-projectile
-	 :ensure t
+	 :defer 5
 	 :after counsel
 	 :config (counsel-projectile-mode))
        (setq projectile-project-search-path '("~/Projects"))
@@ -402,7 +406,7 @@
 					 :src-dir "src/"))
    #+end_src
 * LANGUAGES
-** TODO PYTHON
+** PYTHON
 #+begin_src emacs-lisp
   (use-package python-mode
     :ensure t)
@@ -418,30 +422,30 @@
     :after (python)
     :hook ((python-mode . blacken-mode)))
 #+end_src
-** TODO RUST
+** RUST
 #+begin_src emacs-lisp
   (use-package rust-mode
-    :ensure t)
+    :defer 5)
 
   (use-package cargo
-    :ensure t
+    :defer 5
     :config
     (add-hook 'rust-mode-hook #'cargo-minor-mode))
 
   (use-package flycheck-rust
-    :ensure t
+    :defer 5
     :after (rust-mode)
     :hook ((flycheck-mode . flycheck-rust-setup)))
 #+end_src
-** TODO DART
+** DART
    #+begin_src emacs-lisp
      (use-package dart-mode
-       :ensure t)
+       :defer 5)
    #+end_src
-** TODO WEB
+** WEB
 #+begin_src emacs-lisp
   (use-package web-mode
-    :ensure t
+    :defer 5
     :config
     (add-to-list 'auto-mode-alist '("\\.js[x]?\\'" . web-mode))
     (add-to-list 'auto-mode-alist '("\\.mdx?\\'" . web-mode))
@@ -452,23 +456,23 @@
     (setq web-mode-attr-indent-offset 2)
     (setq web-mode-markup-indent-offset 2))
 #+end_src
-** TODO JSON
+** JSON
 #+begin_src emacs-lisp
   (use-package json-mode
-    :ensure t
-    :defer t
+    :defer 5
     :mode "\\.json$")
 #+end_src
-** TODO TYPESCRIPT
+** TYPESCRIPT
    #+begin_src emacs-lisp
      (use-package typescript-mode
-       :ensure t
+       :defer 5
        :mode (("\\.ts\\'" . typescript-mode)
 	      ("\\.tsx\\'" . typescript-mode)))
    #+end_src
 * ESHELL
 #+begin_src emacs-lisp
   (use-package eshell
+    :defer 5
     :init
     (setq
      eshell-banner-message "...\n"
@@ -572,6 +576,21 @@
   ;; HTTPie
   (+alias 'https '(http --default-scheme=https $*))
 #+end_src
+* CUSTOM CONFIG FILE
+  #+begin_src emacs-lisp
+    (add-hook 'after-init-hook
+	      (lambda ()
+		(let ((custom-file
+		       (expand-file-name "custom.el" user-emacs-directory)))
+		  (unless (file-exists-p custom-file)
+		    (write-region "" "" custom-file))
+		  (load custom-file))))
+  #+end_src
+* REDUCE GARBAGE COLLECTION
+  #+begin_src emacs-lisp
+    ;; Make gc pauses faster by decreasing the threshold.
+    (setq gc-cons-threshold (* 2 1000 1000))
+  #+end_src
 * COMMENT Local Variables
 # Local variables:
 # eval: (add-hook 'after-save-hook (lambda nil (org-babel-tangle)) nil t)
