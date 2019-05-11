@@ -42,11 +42,20 @@
      ;; Don't make new frames when opening a new file with Emacs
      (setq ns-pop-up-frames nil)
 
+     ;; Suppress warning
+     (setq ad-redefinition-action 'accept)
+
      ;; activate column-number-mode
      (column-number-mode 1)
      (setq-default indicate-buffer-boundaries 'right)
 
-     ;; use a different file for custom configurations
+     ;; define abbrev file
+     (setq abbrev-file-name (expand-file-name "abbrev.el" user-emacs-directory))
+     (unless (file-exists-p abbrev-file-name)
+       (write-region "" "" abbrev-file-name))
+     ;; (load abbrev-file-name)
+
+     ;; define custom file
      (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
      (unless (file-exists-p custom-file)
        (write-region "" "" custom-file))
@@ -59,14 +68,6 @@
   (global-set-key (kbd "\C-c n") #'rename-buffer)
   (global-set-key (kbd "<C-s-return>") #'toggle-frame-fullscreen)
 #+end_src
-* FUNCTIONS
-  #+begin_src emacs-lisp
-    (defun watchwords ()
-      "Convert words mentioned below into keywords."
-      (font-lock-add-keywords
-       nil '(("\\<\\(FIXIT\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\|NOCOMMIT\\)"))
-       1 font-lock-warning-face t))
-  #+end_src
 * PACKAGE MANAGER
   #+begin_src emacs-lisp
     (require 'package)
@@ -121,6 +122,11 @@
     (pragmatapro-lig-global-mode t)
 
     ;; define words with special meaning and activate them
+    (defun watchwords ()
+      (font-lock-add-keywords
+       nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|HACK\\|REFACTOR\\|NOCOMMIT\\)"
+	      1 font-lock-warning-face t))))
+
     (add-hook 'prog-mode-hook 'watchwords)
   #+end_src
 * THEMING
@@ -154,14 +160,17 @@
 * LINTING & SPELLING
 ** DONE Flyspell
 #+BEGIN_SRC emacs-lisp
-  (use-package flyspell
-    :hook ((prog-mode . flyspell-prog-mode)
-	   (text-mode . flyspell-mode)))
+  ;; (use-package flyspell
+  ;;   :hook ((prog-mode . flyspell-prog-mode)
+  ;; 	 (text-mode . flyspell-mode))
+  ;;   :config
+  ;;   (setq ispell-program-name (executable-find "hunspell"))
+  ;;   (setq ispell-local-dictionary "en_GB")
+  ;;   (flyspell-mode 1))
 #+END_SRC
 ** TODO Flycheck
 #+BEGIN_SRC emacs-lisp
   (use-package flycheck
-    :ensure t
     :hook ((prog-mode . flycheck-mode))
     :config
     (setq flycheck-python-flake8-executable "flake8")
@@ -201,12 +210,10 @@
 #+end_src
 * CLI CLIENTS
 ** MAGIT
-*** Installing Magit
-#+BEGIN_SRC emacs-lisp
-  (use-package magit
-    :ensure t
-    :commands (magit-status)
-    :bind ("C-x g" . magit-status))
+   #+BEGIN_SRC emacs-lisp
+     (use-package magit
+       :init (magit-auto-revert-mode -1)
+       :bind ("C-x g" . magit-status))
 #+END_SRC
 ** TODO GITGUTTER
 #+begin_src emacs-lisp
@@ -231,12 +238,10 @@
 #+end_src
 ** TODO REST-CLIENT
 #+begin_src emacs-lisp
-  (use-package restclient-mode
-    :defer 5
+  (use-package restclient
     :config (add-hook 'restclient-mode-hook 'company-restclient))
 
   (use-package company-restclient
-    :ensure t
     :config
     (progn
       (add-hook 'restclient-mode-hook
@@ -245,7 +250,6 @@
 		  (company-mode t)))))
 
   (use-package ob-restclient
-    :ensure t
     :config 
     (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
 #+end_src
