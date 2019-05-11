@@ -26,3 +26,4 @@ url/
 /transient/*
 *.eld
 *.data
+/straight/*

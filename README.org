@@ -47,36 +47,22 @@
   #+end_src
 * PACKAGE MANAGER
   #+begin_src emacs-lisp
-    (require 'package)
+    ;; replace package.el with straight.el
+    (let ((bootstrap-file (concat user-emacs-directory "straight/repos/straight.el/bootstrap.el"))
+	  (bootstrap-version 3))
+      (unless (file-exists-p bootstrap-file)
+	(with-current-buffer
+	    (url-retrieve-synchronously
+	     "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	     'silent 'inhibit-cookies)
+	  (goto-char (point-max))
+	  (eval-print-last-sexp)))
+      (load bootstrap-file nil 'nomessage))
 
-    ;; define package manager mirros
-    (add-to-list 'package-archives
-		 '("melpa-stable" . "https://stable.melpa.org/packages/") t)
-    (add-to-list 'package-archives
-	   '("melpa" . "https://melpa.org/packages/") t)
-    (add-to-list 'package-archives
-	   '("org" . "https://orgmode.org/elpa/") t)
-    ;; initialize defined mirrors
-    (package-initialize)
-
-    ;; update the package metadata is the local cache is missing
-    (unless package-archive-contents
-      (package-refresh-contents))
-
-    ;; refresh packages from mirrors
-    ;; install use-package if not already installed
-    (unless (package-installed-p 'use-package)
-      (package-install 'use-package))
-    (require 'use-package)
-
-    ;; automatically update packages
-    ; delete old packages, don't bother showing the results
-    (use-package auto-package-update
-      :defer 2
-      :config
-      (setq auto-package-update-delete-old-versions t
-	    auto-package-update-hide-results t)
-      (auto-package-update-maybe))
+    ;; use straight.el with use-package
+    (setq straight-use-package-by-default t)
+    (straight-use-package 'use-package)
+    (use-package git) ;; ensure we can install from git sources
   #+end_src
 * MAC CONFIGS
   #+begin_src emacs-lisp
@@ -88,7 +74,6 @@
   #+begin_src emacs-lisp
     ; Using ~M-x all-the-icons-fonts~ you can install the fonts
     (use-package doom-themes
-      :ensure t
       :config
       (load-theme 'doom-one t)
       (doom-themes-visual-bell-config)
@@ -115,7 +100,6 @@
 
     ;; Highlight the current line
     (use-package hl-line
-      :ensure nil
       :hook (after-init . global-hl-line-mode))
 
     ;; nice scrolling
@@ -124,13 +108,10 @@
 	  scroll-preserve-screen-position 1)
 
     ;; make buffer name unique with style
-    (use-package uniquify
-      :defer 3
-      :config
-      (setq uniquify-buffer-name-style 'reverse
-	    uniquify-separator "|"
-	    uniquify-after-kill-buffer-p 1
-	    uniquify-ignore-buffers-re "^\\*"))
+    (setq uniquify-buffer-name-style 'reverse
+	  uniquify-separator "|"
+	  uniquify-after-kill-buffer-p 1
+	  uniquify-ignore-buffers-re "^\\*")
   #+end_src
 * OTHER DEFAULTS
    #+begin_src emacs-lisp
@@ -273,8 +254,6 @@
 ** ORG
 #+BEGIN_SRC emacs-lisp
   (use-package org
-    :pin org
-    :ensure org-plus-contrib
     :config (setq
 	     org-src-fontify-natively t
 	     org-src-tab-acts-natively t
@@ -292,6 +271,10 @@
 * MAJOR MODES
 ** IVY / COUNSEL / SWIPER
 #+begin_src emacs-lisp
+  ;; flx makes ivy pattern matching better
+  (use-package flx
+    :defer 5)
+
   (use-package ivy
     :defer 5
     :init (ivy-mode t)
@@ -306,12 +289,10 @@
 	    (t      . ivy--regex-fuzzy))))
 
   (use-package counsel
-    :ensure t
     :bind (("M-x" . counsel-M-x)
 	   ("C-x C-m" . counsel-M-x)))
 
   (use-package swiper
-    :ensure t
     :bind (("C-s" . swiper)))
 
   (use-package all-the-icons-ivy
@@ -408,17 +389,13 @@
 * LANGUAGES
 ** PYTHON
 #+begin_src emacs-lisp
-  (use-package python-mode
-    :ensure t)
+  (use-package python-mode)
 
-  (use-package pyenv-mode
-    :ensure t)
+  (use-package pyenv-mode)
 
-  (use-package pyenv-mode-auto
-    :ensure t)
+  (use-package pyenv-mode-auto)
 
   (use-package blacken
-    :ensure t
     :after (python)
     :hook ((python-mode . blacken-mode)))
 #+end_src
@@ -472,7 +449,6 @@
 * ESHELL
 #+begin_src emacs-lisp
   (use-package eshell
-    :defer 5
     :init
     (setq
      eshell-banner-message "...\n"
