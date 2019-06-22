@@ -567,6 +567,7 @@
     ;; Make gc pauses faster by decreasing the threshold.
     (setq gc-cons-threshold (* 2 1000 1000))
   #+end_src
+
 * COMMENT Local Variables
 # Local variables:
 # eval: (add-hook 'after-save-hook (lambda nil (org-babel-tangle)) nil t)
