@@ -160,7 +160,7 @@
       :config
       (setq flycheck-highlighting-mode 'lines))
   #+end_src
-* EGLOT
+* COMMENT EGLOT
   #+begin_src emacs-lisp
     (use-package eglot
       :defer 5
@@ -170,7 +170,7 @@
       ;; fix column calculation when ligatures are used
       (setq eglot-current-column-function 'eglot-lsp-abiding-column))
   #+end_src
-* COMPANY
+* COMMENT COMPANY
 #+begin_src emacs-lisp
   (use-package company
     :defer 5
@@ -192,7 +192,7 @@
 	   (define-key company-active-map (kbd "\C-d") 'company-show-doc-buffer)
 	   (define-key company-active-map (kbd "<tab>") 'company-complete)))))
 #+end_src
-* CLI CLIENTS
+* COMMENT CLI CLIENTS
 ** MAGIT
    #+BEGIN_SRC emacs-lisp
      (use-package magit
@@ -241,7 +241,7 @@
     :config 
     (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
 #+end_src
-* WRITING & READING
+* COMMENT WRITING & READING
 ** EPUB
 #+begin_src emacs-lisp
   (use-package nov
@@ -268,7 +268,7 @@
     :mode (("\\.markdown\\'" . markdown-mode)
 	   ("\\.md\\'"       . markdown-mode)))
 #+end_src
-* MAJOR MODES
+* COMMENT MAJOR MODES
 ** IVY / COUNSEL / SWIPER
 #+begin_src emacs-lisp
   ;; flx makes ivy pattern matching better
@@ -386,7 +386,7 @@
 					 :test "yarn test"
 					 :src-dir "src/"))
    #+end_src
-* LANGUAGES
+* COMMENT LANGUAGES
 ** PYTHON
 #+begin_src emacs-lisp
   (use-package python-mode)
@@ -446,7 +446,7 @@
        :mode (("\\.ts\\'" . typescript-mode)
 	      ("\\.tsx\\'" . typescript-mode)))
    #+end_src
-* ESHELL
+* COMMENT ESHELL
 #+begin_src emacs-lisp
   (use-package eshell
     :init
@@ -458,15 +458,7 @@
      eshell-save-history-on-exit t
      eshell-prefer-lisp-functions nil
      eshell-destroy-buffer-when-process-dies t
-     eshell-scroll-to-bottom-on-input 'all)
-    :config
-    (defun eshell/clear ()
-      "Clear eshell buffer"
-      (interactive)
-      (let ((inhibit-read-only t))
-	(eshell/clear-scrollback)
-	(eshell-flush -1)
-	(if (eshell-exit-success-p) (message "...") (message "...")))))
+     eshell-scroll-to-bottom-on-input 'all))
 
   (require 'magit)
   (defun display-git-prompt-branch ()
