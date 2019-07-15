@@ -27,3 +27,5 @@ url/
 *.eld
 *.data
 /straight/*
+/amx-items
+/mspyls/*
