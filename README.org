@@ -32,7 +32,7 @@
   #+begin_src emacs-lisp
     ;; define the font family and size
     (set-frame-font "PragmataPro-15" nil t)
-    (setq-default line-spacing 5)
+    ;; (setq-default line-spacing 5)
 
     ;; set pragmatapro ligatures from external file
     (load-file "~/.emacs.d/pragmatapro-lig.el")
@@ -82,6 +82,7 @@
   ;; dependable keybindings
   (global-set-key (kbd "C-c l") #'goto-line)
   (global-set-key (kbd "\C-c n") #'rename-buffer)
+  (global-set-key (kbd "C-c w") #'whitespace-mode)
   (global-set-key (kbd "<C-s-return>") #'toggle-frame-fullscreen)
 #+end_src
 * PACKAGE MANAGER
@@ -103,7 +104,9 @@
     (use-package doom-themes
       :ensure t
       :config
-      (load-theme 'doom-one t)
+      (setq doom-themes-enable-bold nil
+	    doom-themes-enable-italic nil)
+      (load-theme 'doom-vibrant t)
       (doom-themes-visual-bell-config)
       (doom-themes-org-config))
 
@@ -119,6 +122,9 @@
    #+begin_src emacs-lisp
      ;; default directory for dire-mode
      (setq default-directory "~/")
+
+     ;; don't backup please. I got this
+     (setq make-backup-files nil)
 
      ;; activate column-number-mode
      (column-number-mode 1)
@@ -164,6 +170,15 @@
       :config
       (setq flycheck-highlighting-mode 'lines)
       (add-to-list 'flycheck-checkers 'dart-analysis-server))
+  #+end_src
+* WHICH-KEY
+  #+begin_src emacs-lisp
+    (use-package which-key
+      :ensure t
+      :custom
+      (which-key-separator " ")
+      (which-key-prefix-prefix "+")
+      :config (which-key-mode t))
   #+end_src
 * STANDALONE HYDRAS
   #+BEGIN_SRC emacs-lisp
@@ -233,32 +248,91 @@
       (define-key company-active-map (kbd "TAB") 'company-complete)
       (define-key company-active-map (kbd "<tab>") 'company-complete))
   #+END_SRC
+* ORG
+   #+BEGIN_SRC emacs-lisp
+     (use-package org
+      :ensure t
+      :config (setq
+	       org-src-fontify-natively t
+	       org-src-tab-acts-natively t
+	       org-todo-keywords '((sequence "BACKLOG(b)" "TODO(t)" "DOING(n)" "|" "DONE(d)")
+				   (sequence "|"  "ONHOLD(h)" "CANCELED(c)"))
+	       org-agenda-files '("~/.org/agenda.org")))
+
+
+     (use-package restclient
+       :ensure t
+       :config (add-hook 'restclient-mode-hook 'company-restclient))
+
+     (use-package company-restclient
+       :ensure t
+       :config
+       (progn
+	 (add-hook 'restclient-mode-hook
+		   (lambda ()
+		     (set (make-local-variable 'company-backends)'(company-restclient))
+		     (company-mode t)))))
+
+     (use-package ob-restclient
+       :ensure t
+       :config 
+       (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
+
+   #+END_SRC
 * LSP
   #+BEGIN_SRC emacs-lisp
-    (use-package lsp-mode
-      :ensure t
-      :config
-      ;; (add-hook 'python-mode-hook #'lsp)
-      ;; (add-hook 'dart-mode-hook #'lsp)
-      (setq lsp-prefer-flymake nil)
-      (setq lsp-auto-guess-root t))
+	(use-package lsp-mode
+	  :ensure t
+	  :config
+	  ;; (add-hook 'python-mode-hook #'lsp)
+	  ;; (add-hook 'dart-mode-hook #'lsp)
+	  (setq lsp-prefer-flymake nil))
 
-    (use-package company-lsp
-      :ensure t
-      :requires company
-      :config
-      (push 'company-lsp company-backends)
-      (setq company-transformers nil
-	    company-lsp-async t
-	    company-lsp-cache-candidates nil))
+	(use-package lsp-ui
+	  :ensure t
+	  :requires lsp-mode flycheck
+	  :config
+	  (setq lsp-ui-doc-enable t
+		lsp-ui-doc-position 'top
+		lsp-ui-doc-include-signature t
+		lsp-ui-sideline-enable nil
+		lsp-ui-flycheck-enable t
+		lsp-ui-flycheck-list-position 'right
+		lsp-ui-flycheck-live-reporting t
+		lsp-ui-peek-enable t
+		lsp-ui-peek-list-width 60
+		lsp-ui-peek-peek-height 24)
+	  :hook (lsp-mode . lsp-ui-mode))
 
+	(use-package company-lsp
+	  :ensure t
+	  :requires company
+	  :config
+	  (push 'company-lsp company-backends)
+	  (setq company-transformers nil
+		company-lsp-async t
+		company-lsp-cache-candidates nil))
 
-    (use-package yasnippet
+	(use-package yasnippet
+	  :ensure t
+	  :diminish yas-minor-mode
+	  :config
+	  (use-package yasnippet-snippets :ensure t)
+	  (yas-global-mode t))
+  #+END_SRC
+* LANGUAGE UTILS
+  #+BEGIN_SRC emacs-lisp
+    (use-package highlight-indent-guides
       :ensure t
-      :diminish yas-minor-mode
-      :config
-      (use-package yasnippet-snippets :ensure t)
-      (yas-global-mode 1))
+      :hook (prog-mode . highlight-indent-guides-mode)
+      :custom
+      (highlight-indent-guides-character ?\│)
+      (highlight-indent-guides-auto-odd-face-perc 2)
+      (highlight-indent-guides-auto-even-face-perc 2)
+      (highlight-indent-guides-auto-character-face-perc 8)
+      (highlight-indent-guides-method 'character)
+      (highlight-indent-guides-responsive 'character)
+      (highlight-indent-guides-delay 0))
   #+END_SRC
 * LANGUAGES
 ** PYTHON
@@ -277,22 +351,23 @@
    #+end_src
 ** DART
    #+begin_src emacs-lisp
-     (use-package dart-mode
-       :ensure t
-       :after lsp
-       :hook (dart-mode . lsp)
-       :custom
-       (dart-format-on-save t)
-       (dart-sdk-path "~/flutter/bin/cache/dart-sdk/")
-       (with-eval-after-load "projectile"
-	 (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
-	 (add-to-list 'projectile-project-root-files-bottom-up "BUILD")))
+	  (use-package dart-mode
+	    :ensure t
+	    :after lsp
+	    :hook (dart-mode . lsp)
+	    :custom
+	    (dart-format-on-save t)
+	    (dart-sdk-path "~/flutter/bin/cache/dart-sdk/")
+	    (with-eval-after-load "projectile"
+	      (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
+	      (add-to-list 'projectile-project-root-files-bottom-up "BUILD"))
+	    (lsp-auto-guess-root t))
 
-     (use-package flutter
-       :ensure t
-       :after dart-mode
-       :bind (:map dart-mode-map ("C-M-x" . #'flutter-run-or-hot-reload))
-       :custom (flutter-sdk-path "~/flutter/"))
+	  (use-package flutter
+	    :ensure t
+	    :after dart-mode
+	    :bind (:map dart-mode-map ("C-M-x" . #'flutter-run-or-hot-reload))
+	    :custom (flutter-sdk-path "~/flutter/"))
    #+end_src
 ** COMMENT RUST
 #+begin_src emacs-lisp
@@ -350,104 +425,6 @@
   (use-package dockerfile-mode :ensure t)
   (use-package docker-compose-mode :ensure t)
   (use-package docker-tramp :ensure t)
-#+end_src
-** COMMENT REST-CLIENT
-#+begin_src emacs-lisp
-  (use-package restclient
-    :defer 5
-    :config (add-hook 'restclient-mode-hook 'company-restclient))
-
-  (use-package company-restclient
-    :defer 5
-    :config
-    (progn
-      (add-hook 'restclient-mode-hook
-		(lambda ()
-		  (set (make-local-variable 'company-backends)'(company-restclient))
-		  (company-mode t)))))
-
-  (use-package ob-restclient
-    :defer 5
-    :config 
-    (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
-#+end_src
-* COMMENT MAJOR MODES
-** ANZU
-#+begin_src emacs-lisp
-  (use-package anzu
-    :defer 5
-    :config
-    (global-anzu-mode t)
-    (global-set-key [remap query-replace-regexp] 'anzu-query-replace-regexp)
-    (global-set-key [remap query-replace] 'anzu-query-replace))
-#+end_src
-** WHITESPACE
-#+begin_src emacs-lisp
-  (use-package whitespace
-    :defer 5
-    :bind ("\C-c w" . whitespace-mode))
-#+end_src
-** COMMENT PARINFER
-#+begin_src emacs-lisp
-  ;; favor smartparens instead
-  (use-package smartparens
-    :defer 5
-    :config
-    (require 'smartparens-config)
-    (show-smartparens-global-mode 1)
-    (smartparens-global-mode 1))
-
-  ;; parinfer is the best especially with lisp dialects
-  (use-package parinfer
-    :defer 5
-    :bind (("C-," . parinfer-toggle-mode))
-    :init
-    (progn
-      (setq parinfer-extensions
-	    '(defaults       ; should be included.
-	       pretty-parens  ; different paren styles for different modes.
-	       smart-tab      ; C-b & C-f jump positions and smart shift with tab & S-tab.
-	       smart-yank))   ; Yank behavior depend on mode.
-      (add-hook 'clojure-mode-hook #'parinfer-mode)
-      (add-hook 'emacs-lisp-mode-hook #'parinfer-mode)
-      (add-hook 'lisp-mode-hook #'parinfer-mode)))
-#+end_src
-** WHICH-KEY
-#+begin_src emacs-lisp
-  ;; Which Key
-  (use-package which-key
-    :defer 5
-    :init
-    (setq which-key-separator " ")
-    (setq which-key-prefix-prefix "+")
-    :config (which-key-mode))
-#+end_src
-* COMMENT WRITING & READING
-** EPUB
-#+begin_src emacs-lisp
-  (use-package nov
-    :defer 5
-    :mode ("\\.epub\\'" . nov-mode)
-    :config (progn
-	      (setq nov-text-width 80)
-	      (setq nov-variable-pitch nil)))
-#+end_src
-** ORG
-#+BEGIN_SRC emacs-lisp
-  (use-package org
-    :config (setq
-	     org-src-fontify-natively t
-	     org-src-tab-acts-natively t
-	     org-todo-keywords '((sequence "BACKLOG(b)" "TODO(t)" "DOING(n)" "|" "DONE(d)")
-				 (sequence "|"  "ONHOLD(h)" "CANCELED(c)"))
-	     org-agenda-files '("~/.org/agenda.org")))
-#+END_SRC
-** MARKDOWN
-#+begin_src emacs-lisp
-  (use-package markdown-mode
-    :defer 5
-    :mode (("\\.markdown\\'" . markdown-mode)
-	   ("\\.md\\'"       . markdown-mode)))
 #+end_src
 * COMMENT ESHELL
 #+begin_src emacs-lisp
