@@ -162,7 +162,8 @@
       :ensure t
       :hook ((prog-mode . flycheck-mode))
       :config
-      (setq flycheck-highlighting-mode 'lines))
+      (setq flycheck-highlighting-mode 'lines)
+      (add-to-list 'flycheck-checkers 'dart-analysis-server))
   #+end_src
 * STANDALONE HYDRAS
   #+BEGIN_SRC emacs-lisp
@@ -202,13 +203,13 @@
   #+BEGIN_SRC emacs-lisp
     (use-package projectile
       :ensure t
-      :config
-      (projectile-mode t)
-      (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+      :config (projectile-mode t))
 
     (use-package counsel-projectile
       :ensure t
-      :config (counsel-projectile-mode))
+      :config
+      (counsel-projectile-mode)
+      (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
   #+END_SRC
 * COMPANY
   #+BEGIN_SRC emacs-lisp
@@ -237,8 +238,10 @@
     (use-package lsp-mode
       :ensure t
       :config
-      (add-hook 'python-mode-hook #'lsp)
-      (setq lsp-prefer-flymake nil))
+      ;; (add-hook 'python-mode-hook #'lsp)
+      ;; (add-hook 'dart-mode-hook #'lsp)
+      (setq lsp-prefer-flymake nil)
+      (setq lsp-auto-guess-root t))
 
     (use-package company-lsp
       :ensure t
@@ -248,6 +251,14 @@
       (setq company-transformers nil
 	    company-lsp-async t
 	    company-lsp-cache-candidates nil))
+
+
+    (use-package yasnippet
+      :ensure t
+      :diminish yas-minor-mode
+      :config
+      (use-package yasnippet-snippets :ensure t)
+      (yas-global-mode 1))
   #+END_SRC
 * LANGUAGES
 ** PYTHON
@@ -256,13 +267,32 @@
        :ensure t
        :hook (python-mode . (lambda () (require 'lsp-python-ms) (lsp))))
 
-     ;; (use-package pyenv-mode)
+     ;; (use-package pyenv-mode :ensure t)
 
-     ;; (use-package pyenv-mode-auto)
+     ;; (use-package pyenv-mode-auto :ensure t)
 
      ;; (use-package blacken
-     ;;  :after (python)
-     ;;  :hook ((python-mode . blacken-mode)))
+     ;; :after python
+     ;; :hook (python-mode . blacken-mode))
+   #+end_src
+** DART
+   #+begin_src emacs-lisp
+     (use-package dart-mode
+       :ensure t
+       :after lsp
+       :hook (dart-mode . lsp)
+       :custom
+       (dart-format-on-save t)
+       (dart-sdk-path "~/flutter/bin/cache/dart-sdk/")
+       (with-eval-after-load "projectile"
+	 (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
+	 (add-to-list 'projectile-project-root-files-bottom-up "BUILD")))
+
+     (use-package flutter
+       :ensure t
+       :after dart-mode
+       :bind (:map dart-mode-map ("C-M-x" . #'flutter-run-or-hot-reload))
+       :custom (flutter-sdk-path "~/flutter/"))
    #+end_src
 ** COMMENT RUST
 #+begin_src emacs-lisp
@@ -279,11 +309,6 @@
     :after (rust-mode)
     :hook ((flycheck-mode . flycheck-rust-setup)))
 #+end_src
-** COMMENT DART
-   #+begin_src emacs-lisp
-     (use-package dart-mode
-       :defer 5)
-   #+end_src
 ** COMMENT WEB
 #+begin_src emacs-lisp
   (use-package web-mode

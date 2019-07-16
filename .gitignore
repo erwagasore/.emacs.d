@@ -20,7 +20,7 @@ url/
 /custom.el*
 /init.el*
 /ido.*
-/recentf
+/recentf*
 /.*
 /clear
 /transient/*
