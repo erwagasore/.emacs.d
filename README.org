@@ -86,21 +86,22 @@
   (global-set-key (kbd "<C-s-return>") #'toggle-frame-fullscreen)
 #+end_src
 * PACKAGE MANAGER
-  #+BEGIN_SRC emacs-lisp
+  #+begin_src emacs-lisp
     (require 'package)
     (setq package-enable-at-startup nil)
+    (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/"))
     (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
-    (add-to-list 'package-archives '("gnu" . "http://elpa.emacs-china.org/gnu/"))
     (package-initialize)
-
 
     (unless (package-installed-p 'use-package)
       (package-refresh-contents)
       (package-install 'use-package))
-  #+END_SRC
+  #+end_src
 * THEMING
-  #+BEGIN_SRC emacs-lisp
-    ; Using ~M-x all-the-icons-fonts~ you can install the fonts
+  #+begin_src emacs-lisp
+    (use-package zerodark-theme
+      :ensure t)
+
     (use-package doom-themes
       :ensure t
       :config
@@ -112,12 +113,12 @@
 
     (use-package doom-modeline
       :ensure t
-      :hook (after-init . doom-modeline-init))
+      :hook (after-init . doom-modeline-mode))
 
     (use-package all-the-icons
       :ensure t
       :config (setq inhibit-compacting-font-caches t))
-  #+END_SRC
+  #+end_src
 * OTHER DEFAULTS
    #+begin_src emacs-lisp
      ;; default directory for dire-mode
@@ -129,6 +130,9 @@
      ;; activate column-number-mode
      (column-number-mode 1)
      (setq-default indicate-buffer-boundaries 'right)
+
+     ;; delete marked region with 'DEL' key or backspace
+     (delete-selection-mode t)
 
      ;; set bash environment variables
      (use-package exec-path-from-shell
@@ -181,41 +185,45 @@
       :config (which-key-mode t))
   #+end_src
 * COMMENT STANDALONE HYDRAS
-  #+BEGIN_SRC emacs-lisp
+  #+begin_src emacs-lisp
     (defhydra hydra-zoom (global-map "s-=")
       "zoom"
       ("n" text-scale-increase "in")
       ("0" text-scale-adjust "equal")
       ("p" text-scale-decrease "out"))
-  #+END_SRC
+  #+end_src
 * COUNSEL
-  #+BEGIN_SRC emacs-lisp
-	(use-package amx :ensure t)
-	(use-package flx :ensure t)
+  #+begin_src emacs-lisp
+    (use-package amx :ensure t)
+    (use-package flx :ensure t)
 
-	(use-package counsel
-	  :ensure t
-	  :config
-	  (ivy-mode t)
-	  (setq ivy-use-virtual-buffers t
-		ivy-initial-inputs-alist nil
-		enable-recursive-minibuffers t
-		search-default-mode #'char-fold-to-regexp
-		ivy-re-builders-alist
-		'((ivy-switch-buffer . ivy--regex-plus)
-		  (t . ivy--regex-fuzzy)))
-	  :bind (("C-s" . counsel-grep-or-swiper)
-		 ("M-x" . counsel-M-x)
-		 ("C-x C-m" . counsel-M-x)
-		 ("C-x C-f" . counsel-find-file)))
+    (use-package counsel
+      :ensure t
+      :config
+      (ivy-mode t)
+      (setq ivy-use-virtual-buffers t
+	    ivy-initial-inputs-alist nil
+	    enable-recursive-minibuffers t
+	    search-default-mode #'char-fold-to-regexp
+	    ivy-re-builders-alist
+	    '((ivy-switch-buffer . ivy--regex-plus)
+	      (t . ivy--regex-fuzzy)))
+      :bind (("C-s" . counsel-grep-or-swiper)
+	     ("M-x" . counsel-M-x)
+	     ("C-x C-m" . counsel-M-x)
+	     ("C-x C-f" . counsel-find-file)))
 
-	(use-package all-the-icons-ivy
-	  :ensure t
-	  :config
-	  (all-the-icons-ivy-setup))
-  #+END_SRC
+    (use-package avy-flycheck
+      :ensure t
+      :config
+      (global-set-key (kbd "C-'") #'avy-flycheck-goto-error))
+
+    (use-package all-the-icons-ivy
+      :ensure t
+      :config (all-the-icons-ivy-setup))
+  #+end_src
 * PROJECTILE
-  #+BEGIN_SRC emacs-lisp
+  #+begin_src emacs-lisp
     (use-package projectile
       :ensure t
       :config (projectile-mode t))
@@ -225,9 +233,9 @@
       :config
       (counsel-projectile-mode)
       (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
-  #+END_SRC
+  #+end_src
 * COMPANY
-  #+BEGIN_SRC emacs-lisp
+  #+begin_src emacs-lisp
     (use-package company
       :ensure t
       :config
@@ -247,40 +255,40 @@
       (define-key company-active-map (kbd "C-p") 'company-select-previous)
       (define-key company-active-map (kbd "TAB") 'company-complete)
       (define-key company-active-map (kbd "<tab>") 'company-complete))
-  #+END_SRC
+  #+end_src
 * ORG
-   #+BEGIN_SRC emacs-lisp
-     (use-package org
+  #+begin_src emacs-lisp
+    (use-package org
+     :ensure org-plus-contrib
+     :config (setq
+	      org-src-fontify-natively t
+	      org-src-tab-acts-natively t
+	      org-todo-keywords '((sequence "BACKLOG(b)" "TODO(t)" "DOING(n)" "|" "DONE(d)")
+				  (sequence "|"  "ONHOLD(h)" "CANCELED(c)"))
+	      org-agenda-files '("~/.org/agenda.org")))
+
+
+    (use-package restclient
       :ensure t
-      :config (setq
-	       org-src-fontify-natively t
-	       org-src-tab-acts-natively t
-	       org-todo-keywords '((sequence "BACKLOG(b)" "TODO(t)" "DOING(n)" "|" "DONE(d)")
-				   (sequence "|"  "ONHOLD(h)" "CANCELED(c)"))
-	       org-agenda-files '("~/.org/agenda.org")))
+      :config (add-hook 'restclient-mode-hook 'company-restclient))
 
+    (use-package company-restclient
+      :ensure t
+      :config
+      (progn
+	(add-hook 'restclient-mode-hook
+		  (lambda ()
+		    (set (make-local-variable 'company-backends)'(company-restclient))
+		    (company-mode t)))))
 
-     (use-package restclient
-       :ensure t
-       :config (add-hook 'restclient-mode-hook 'company-restclient))
+    (use-package ob-restclient
+      :ensure t
+      :config 
+      (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
 
-     (use-package company-restclient
-       :ensure t
-       :config
-       (progn
-	 (add-hook 'restclient-mode-hook
-		   (lambda ()
-		     (set (make-local-variable 'company-backends)'(company-restclient))
-		     (company-mode t)))))
-
-     (use-package ob-restclient
-       :ensure t
-       :config 
-       (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
-
-   #+END_SRC
+  #+end_src
 * LSP
-  #+BEGIN_SRC emacs-lisp
+  #+begin_src emacs-lisp
 	(use-package lsp-mode
 	  :ensure t
 	  :config
@@ -297,7 +305,7 @@
 		lsp-ui-flycheck-list-position 'right
 		lsp-ui-flycheck-live-reporting t
 		lsp-ui-peek-enable t
-		lsp-ui-peek-list-width 60
+		lsp-ui-peek-list-width 56
 		lsp-ui-peek-peek-height 24)
 	  :hook (lsp-mode . lsp-ui-mode))
 
@@ -316,9 +324,18 @@
 	  :config
 	  (use-package yasnippet-snippets :ensure t)
 	  (yas-global-mode t))
-  #+END_SRC
+  #+end_src
 * LANGUAGE UTILS
-  #+BEGIN_SRC emacs-lisp
+  #+begin_src emacs-lisp
+    (use-package smartparens
+      :ensure t
+      :config (progn (show-smartparens-global-mode t))
+      :hook (prog-mode . turn-on-smartparens-strict-mode))
+
+    (use-package rainbow-delimiters
+      :ensure t
+      :hook (prog-mode . rainbow-delimiters-mode))
+
     (use-package highlight-indent-guides
       :ensure t
       :hook (prog-mode . highlight-indent-guides-mode)
@@ -330,7 +347,7 @@
       (highlight-indent-guides-method 'character)
       (highlight-indent-guides-responsive 'character)
       (highlight-indent-guides-delay 0))
-  #+END_SRC
+  #+end_src
 * LANGUAGES
 ** PYTHON
    #+begin_src emacs-lisp
@@ -348,23 +365,24 @@
    #+end_src
 ** DART
    #+begin_src emacs-lisp
-	  (use-package dart-mode
-	    :ensure t
-	    :after lsp
-	    :hook (dart-mode . lsp)
-	    :custom
-	    (dart-format-on-save t)
-	    (dart-sdk-path "~/flutter/bin/cache/dart-sdk/")
-	    (with-eval-after-load "projectile"
-	      (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
-	      (add-to-list 'projectile-project-root-files-bottom-up "BUILD"))
-	    (lsp-auto-guess-root t))
+     (use-package dart-mode
+       :ensure t
+       :after lsp
+       :hook ((dart-mode . lsp)
+	      (after-save . (lambda () (flutter-run-or-hot-reload))))
+       :custom
+       (dart-format-on-save t)
+       (dart-sdk-path "~/flutter/bin/cache/dart-sdk/")
+       (with-eval-after-load "projectile"
+	 (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
+	 (add-to-list 'projectile-project-root-files-bottom-up "BUILD"))
+       (lsp-auto-guess-root t))
 
-	  (use-package flutter
-	    :ensure t
-	    :after dart-mode
-	    :bind (:map dart-mode-map ("C-M-x" . #'flutter-run-or-hot-reload))
-	    :custom (flutter-sdk-path "~/flutter/"))
+     (use-package flutter
+       :ensure t
+       :after dart-mode
+       :bind (:map dart-mode-map ("C-M-x" . #'flutter-run-or-hot-reload))
+       :custom (flutter-sdk-path "~/flutter/"))
    #+end_src
 ** COMMENT RUST
 #+begin_src emacs-lisp
@@ -395,15 +413,9 @@
     (setq web-mode-attr-indent-offset 2)
     (setq web-mode-markup-indent-offset 2))
 #+end_src
-** COMMENT JSON
-#+begin_src emacs-lisp
-  (use-package json-mode
-    :defer 5
-    :mode "\\.json$")
-#+end_src
 * CLI CLIENTS
 ** GIT
-   #+BEGIN_SRC emacs-lisp
+   #+begin_src emacs-lisp
      (use-package magit
        :ensure t
        :init (magit-auto-revert-mode -1)
@@ -538,7 +550,7 @@
     (setq gc-cons-threshold (* 2 1000 1000))
   #+end_src
 
-* COMMENT Local Variables
+* COMMENT LOCAL VARIABLES
 # Local variables:
 # eval: (add-hook 'after-save-hook (lambda nil (org-babel-tangle)) nil t)
 # end:
