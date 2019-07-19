@@ -172,8 +172,7 @@
       :ensure t
       :hook ((prog-mode . flycheck-mode))
       :config
-      (setq flycheck-highlighting-mode 'lines)
-      (add-to-list 'flycheck-checkers 'dart-analysis-server))
+      (setq flycheck-highlighting-mode 'lines))
   #+end_src
 * WHICH-KEY
   #+begin_src emacs-lisp
@@ -247,8 +246,7 @@
 	    company-minimum-prefix-length 1
 	    company-require-match nil
 	    company-selection-wrap-around t
-	    company-tooltip-align-annotations t
-	    company-tooltip-flip-when-above t)
+	    company-tooltip-align-annotations t)
       (define-key company-active-map (kbd "M-n") nil)
       (define-key company-active-map (kbd "M-p") nil)
       (define-key company-active-map (kbd "C-n") 'company-select-next)
@@ -289,41 +287,39 @@
   #+end_src
 * LSP
   #+begin_src emacs-lisp
-	(use-package lsp-mode
-	  :ensure t
-	  :config
-	  ;; (add-hook 'python-mode-hook #'lsp)
-	  ;; (add-hook 'dart-mode-hook #'lsp)
-	  (setq lsp-prefer-flymake nil))
+    (use-package lsp-mode
+      :ensure t
+      :config
+      ;; (add-hook 'python-mode-hook #'lsp)
+      ;; (add-hook 'dart-mode-hook #'lsp)
+      (setq lsp-prefer-flymake nil
+	    lsp-enable-on-type-formatting nil
+	    lsp-log-max 100000))
 
-	(use-package lsp-ui
-	  :ensure t
-	  :requires lsp-mode flycheck
-	  :config
-	  (setq lsp-ui-sideline-enable nil
-		lsp-ui-flycheck-enable t
-		lsp-ui-flycheck-list-position 'right
-		lsp-ui-flycheck-live-reporting t
-		lsp-ui-peek-enable t
-		lsp-ui-peek-list-width 56
-		lsp-ui-peek-peek-height 24)
-	  :hook (lsp-mode . lsp-ui-mode))
+    (use-package lsp-ui
+      :ensure t
+      :requires lsp-mode flycheck
+      :config
+      (setq lsp-ui-sideline-enable t
+	    lsp-ui-sideline-show-symbol nil)
+      :hook (lsp-mode . lsp-ui-mode))
 
-	(use-package company-lsp
-	  :ensure t
-	  :requires company
-	  :config
-	  (push 'company-lsp company-backends)
-	  (setq company-transformers nil
-		company-lsp-async t
-		company-lsp-cache-candidates nil))
+    (use-package company-lsp
+      :ensure t
+      :requires company
+      :config
+      (push 'company-lsp company-backends)
+      (setq company-transformers nil
+	    company-lsp-async t
+	    company-lsp-cache-candidates 'auto
+	    company-lsp-filter-candidates t))
 
-	(use-package yasnippet
-	  :ensure t
-	  :diminish yas-minor-mode
-	  :config
-	  (use-package yasnippet-snippets :ensure t)
-	  (yas-global-mode t))
+    (use-package yasnippet
+      :ensure t
+      :diminish yas-minor-mode
+      :config
+      (use-package yasnippet-snippets :ensure t)
+      (yas-global-mode t))
   #+end_src
 * LANGUAGE UTILS
   #+begin_src emacs-lisp
@@ -375,8 +371,7 @@
        (dart-sdk-path "~/flutter/bin/cache/dart-sdk/")
        (with-eval-after-load "projectile"
 	 (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
-	 (add-to-list 'projectile-project-root-files-bottom-up "BUILD"))
-       (lsp-auto-guess-root t))
+	 (add-to-list 'projectile-project-root-files-bottom-up "BUILD")))
 
      (use-package flutter
        :ensure t
