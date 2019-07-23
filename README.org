@@ -3,7 +3,7 @@
   #+begin_src emacs-lisp
     ;; Make startup faster by reducing the frequency of garbage
     ;; collection.  The default is 800 kilobytes.  Measured in bytes.
-    (setq gc-cons-threshold (* 80 1000 1000))
+    (setq gc-cons-threshold (* 512 1000 1000))
   #+end_src
 * UI CLEANUP
    #+begin_src emacs-lisp
@@ -31,8 +31,7 @@
 * TEXT RENDERING
   #+begin_src emacs-lisp
     ;; define the font family and size
-    (set-frame-font "PragmataPro-15" nil t)
-    ;; (setq-default line-spacing 5)
+    (set-frame-font "PragmataPro-14" nil t)
 
     ;; set pragmatapro ligatures from external file
     (load-file "~/.emacs.d/pragmatapro-lig.el")
@@ -54,10 +53,10 @@
 * UX CLEANUP
   #+begin_src emacs-lisp
     ;; disable backup
-    (setq make-backup-files -1)
+    (setq make-backup-files nil)
 
     ;; Don't make new frames when opening a new file with Emacs
-    (setq ns-pop-up-frames -1)
+    (setq ns-pop-up-frames nil)
 
     ;; define alias to answering just 'y' or 'n' instead
     (defalias 'yes-or-no-p 'y-or-n-p)
@@ -69,12 +68,12 @@
     ;; nice scrolling
     (setq scroll-margin 0
 	  scroll-conservatively 100000
-	  scroll-preserve-screen-position 1)
+	  scroll-preserve-screen-position t)
 
     ;; make buffer name unique with style
     (setq uniquify-buffer-name-style 'reverse
 	  uniquify-separator "|"
-	  uniquify-after-kill-buffer-p 1
+	  uniquify-after-kill-buffer-p t
 	  uniquify-ignore-buffers-re "^\\*")
   #+end_src
 * GLOBAL BINDINGS
@@ -99,9 +98,6 @@
   #+end_src
 * THEMING
   #+begin_src emacs-lisp
-    (use-package zerodark-theme
-      :ensure t)
-
     (use-package doom-themes
       :ensure t
       :config
@@ -128,7 +124,7 @@
      (setq make-backup-files nil)
 
      ;; activate column-number-mode
-     (column-number-mode 1)
+     (column-number-mode t)
      (setq-default indicate-buffer-boundaries 'right)
 
      ;; delete marked region with 'DEL' key or backspace
@@ -253,6 +249,10 @@
       (define-key company-active-map (kbd "C-p") 'company-select-previous)
       (define-key company-active-map (kbd "TAB") 'company-complete)
       (define-key company-active-map (kbd "<tab>") 'company-complete))
+
+    (use-package company-flx
+      :ensure t
+      :config (company-flx-mode t))
   #+end_src
 * ORG
   #+begin_src emacs-lisp
@@ -315,7 +315,7 @@
 	    company-lsp-filter-candidates t))
 
     (use-package yasnippet
-      :ensure t
+      :defer 1
       :diminish yas-minor-mode
       :config
       (use-package yasnippet-snippets :ensure t)
@@ -360,6 +360,7 @@
      ;; :hook (python-mode . blacken-mode))
    #+end_src
 ** DART
+** 
    #+begin_src emacs-lisp
      (use-package dart-mode
        :ensure t
@@ -430,104 +431,109 @@
   (use-package docker-compose-mode :ensure t)
   (use-package docker-tramp :ensure t)
 #+end_src
-* COMMENT ESHELL
-#+begin_src emacs-lisp
-  (use-package eshell
-    :init
-    (setq
-     eshell-banner-message "...\n"
-     eshell-hist-ignoredups t
-     eshell-error-if-no-glob t
-     eshell-cmpl-ignore-case t
-     eshell-save-history-on-exit t
-     eshell-prefer-lisp-functions nil
-     eshell-destroy-buffer-when-process-dies t
-     eshell-scroll-to-bottom-on-input 'all))
+* ESHELL
+  #+begin_src emacs-lisp
+    (use-package eshell
+      :config
+      (setq
+       eshell-banner-message "...\n"
+       eshell-hist-ignoredups t
+       eshell-error-if-no-glob t
+       eshell-cmpl-ignore-case t
+       eshell-save-history-on-exit t
+       eshell-prefer-lisp-functions nil
+       eshell-destroy-buffer-when-process-dies t
+       eshell-scroll-to-bottom-on-input 'all))
 
-  (require 'magit)
-  (defun display-git-prompt-branch ()
-    (if (not (null (magit-get-current-branch))) (concat "￨" (magit-get-current-branch)) ""))
+    (defun eshell/clear ()
+      "Clear eshell buffer"
+      (interactive)
+      (let ((inhibit-read-only t)) (erase-buffer)))
 
-  (defun get-first-char (str)
-    (if (zerop (length str)) "" (substring str 0 1)))
+    (require 'magit)
+    (defun display-git-prompt-branch ()
+      (if (not (null (magit-get-current-branch))) (concat "￨" (magit-get-current-branch)) ""))
 
-  (defun fill-window-with-char ()
-    (make-string (window-body-width) ?_))
+    (defun get-first-char (str)
+      (if (zerop (length str)) "" (substring str 0 1)))
 
-  (defun pwd-shorten-dirs (pwd)
-    "Shorten all directory names in PWD except the last two."
-    (let ((path-items (split-string pwd "/")))
-      (if (> (length path-items) 2)
-	  (concat
-	   (mapconcat 'get-first-char (butlast path-items 2) "/")
-	   "/"
-	   (mapconcat (lambda (item) item) (last path-items 2) "/"))
-	pwd)))
+    (defun fill-window-with-char ()
+      (make-string (window-body-width) ?_))
 
-  (setq eshell-prompt-function
-	(lambda nil
-	  (concat
-	   (propertize (fill-window-with-char) 'face '(:foreground "#234768"))
-	   (propertize "\n" 'face nil)
-	   (propertize "╭⟢" 'face '(:foreground "#A2DEB2"))
-	   (propertize " " 'face nil)
-	   (propertize (user-login-name) 'face '(:foreground "#5DC078"))
-	   (propertize "@" 'face '(:foreground "#0057FF"))
-	   (propertize (system-name) 'face '(:foreground "#0083FF"))
-	   (propertize " ⯌ " 'face nil)
-	   (propertize "￨" 'face '(:foreground "#74CAFF"))
-	   (propertize (pwd-shorten-dirs (abbreviate-file-name (eshell/pwd)))
-		       'face '(:foreground "#74CAFF"))
-	   (propertize " ⯌ " 'face nil)
-	   (propertize (display-git-prompt-branch) 'face '(:foreground "#A2DEB2"))
-	   (propertize "\n" 'face nil)
-	   (propertize "╰🡢" 'face '(:foreground "#A2DEB2"))
-	   (propertize " " 'face nil))))
+    (defun pwd-shorten-dirs (pwd)
+      "Shorten all directory names in PWD except the last two."
+      (let ((path-items (split-string pwd "/")))
+	(if (> (length path-items) 2)
+	    (concat
+	     (mapconcat 'get-first-char (butlast path-items 2) "/")
+	     "/"
+	     (mapconcat (lambda (item) item) (last path-items 2) "/"))
+	  pwd)))
 
-  (setq eshell-highlight-prompt nil)
+    (setq eshell-prompt-function
+	  (lambda nil
+	    (concat
+	     (propertize (fill-window-with-char) 'face '(:foreground "#234768"))
+	     (propertize "\n" 'face nil)
+	     (propertize "╭⟢" 'face '(:foreground "#A2DEB2"))
+	     (propertize " " 'face nil)
+	     (propertize (user-login-name) 'face '(:foreground "#5DC078"))
+	     (propertize "@" 'face '(:foreground "#0057FF"))
+	     (propertize (system-name) 'face '(:foreground "#0083FF"))
+	     (propertize " ⯌ " 'face nil)
+	     (propertize "￨" 'face '(:foreground "#74CAFF"))
+	     (propertize (pwd-shorten-dirs (abbreviate-file-name (eshell/pwd)))
+			 'face '(:foreground "#74CAFF"))
+	     (propertize " ⯌ " 'face nil)
+	     (propertize (display-git-prompt-branch) 'face '(:foreground "#A2DEB2"))
+	     (propertize "\n" 'face nil)
+	     (propertize "╰🡢" 'face '(:foreground "#A2DEB2"))
+	     (propertize " " 'face nil))))
 
-  ;; handle visual commands
-  (require 'em-term)
-  (add-to-list `eshell-visual-commands "top")
-  (add-to-list `eshell-visual-subcommands '("git" "log" "diff" "show"))
-  (add-to-list `eshell-visual-options '("git" "--help"))
+    (setq eshell-highlight-prompt nil)
 
-  ;; Set this to match eshell-prompt-function
-  (setq eshell-prompt-regexp "^╰🡢 ")
+    ;; handle visual commands
+    (require 'em-term)
+    (add-to-list `eshell-visual-commands "top")
+    (add-to-list `eshell-visual-subcommands '("git" "log" "diff" "show"))
+    (add-to-list `eshell-visual-options '("git" "--help"))
 
-  ;; define portable aliases
-  (setq eshell-command-aliases-list ())
+    ;; Set this to match eshell-prompt-function
+    (setq eshell-prompt-regexp "^╰🡢 ")
 
-  (defun +alias (al cmd)
-    "handy wrapper function to convert alias symbols to alias
-	  strings to avoid writing 4 quotes per alias. AL is a single-word
-	  symbol naming the alias, CMD is a list symbol describing the
-	  command."
-    (add-to-list 'eshell-command-aliases-list
-		 (list (symbol-name al)
-		       (mapconcat 'symbol-name cmd " "))))
+    ;; define portable aliases
+    (setq eshell-command-aliases-list ())
 
-  ;; actual aliases
-  (+alias 'l      '(ls -laF))
-  (+alias 'll     '(ls -l))
-  (+alias 'la     '(ls -a))
-  (+alias 'lt     '(ls -ltr $*))
-  (+alias '..     '(cd ..))
-  (+alias '...    '(cd ../..))
-  (+alias '....   '(cd ../../..))
-  (+alias '.....  '(cd ../../../..))
-  (+alias 'md     '(mkdir -p))
-  (+alias 'emacs  '(find-file $1))
-  (+alias 'less   '(find-file-read-only $1))
+    (defun +alias (al cmd)
+      "handy wrapper function to convert alias symbols to alias
+	    strings to avoid writing 4 quotes per alias. AL is a single-word
+	    symbol naming the alias, CMD is a list symbol describing the
+	    command."
+      (add-to-list 'eshell-command-aliases-list
+		   (list (symbol-name al)
+			 (mapconcat 'symbol-name cmd " "))))
 
-  ;; Docker
-  (+alias 'd '(docker $*))
-  (+alias 'dc '(docker-compose $*))
-  (+alias 'dm '(docker-machine $*))
+    ;; actual aliases
+    (+alias 'l      '(ls -laF))
+    (+alias 'll     '(ls -l))
+    (+alias 'la     '(ls -a))
+    (+alias 'lt     '(ls -ltr $*))
+    (+alias '..     '(cd ..))
+    (+alias '...    '(cd ../..))
+    (+alias '....   '(cd ../../..))
+    (+alias '.....  '(cd ../../../..))
+    (+alias 'md     '(mkdir -p))
+    (+alias 'emacs  '(find-file $1))
+    (+alias 'less   '(find-file-read-only $1))
 
-  ;; HTTPie
-  (+alias 'https '(http --default-scheme=https $*))
-#+end_src
+    ;; Docker
+    (+alias 'd '(docker $*))
+    (+alias 'dc '(docker-compose $*))
+    (+alias 'dm '(docker-machine $*))
+
+    ;; HTTPie
+    (+alias 'https '(http --default-scheme=https $*))
+  #+end_src
 * CUSTOM.EL CONFIG FILE
   #+begin_src emacs-lisp
     (add-hook
@@ -542,7 +548,7 @@
 * REDUCE GARBAGE COLLECTION
   #+begin_src emacs-lisp
     ;; Make gc pauses faster by decreasing the threshold.
-    (setq gc-cons-threshold (* 2 1000 1000))
+    (setq gc-cons-threshold (* 16 1000 1000))
   #+end_src
 
 * COMMENT LOCAL VARIABLES
