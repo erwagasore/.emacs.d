@@ -28,21 +28,6 @@
      (setq inhibit-startup-message 1
 	   initial-scratch-message ";; Happy Hacking\n")
    #+end_src
-* FRAME POSITIONING
-  #+begin_src emacs-lisp
-    (defun set-initial-frame ()
-      "Defines and center the frame window"
-      (let* ((base-factor 0.72)
-	     (a-width (* (display-pixel-width) base-factor))
-	     (a-height (* (display-pixel-height) base-factor))
-	     (a-left (truncate (/ (- (display-pixel-width) a-width) 2)))
-	     (a-top (truncate (/ (- (display-pixel-height) a-height) 2))))
-	(set-frame-position (selected-frame) a-left a-top)
-	(set-frame-size (selected-frame) (truncate a-width) (truncate a-height) t)))
-
-    (setq frame-resize-pixelwise t)
-    (set-initial-frame)
-  #+end_src
 * TEXT RENDERING
   #+begin_src emacs-lisp
     ;; define the font family and size
@@ -58,6 +43,21 @@
        nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|HACK\\|REFACTOR\\|NOCOMMIT\\)"
 	      1 font-lock-warning-face t))))
     (add-hook 'prog-mode-hook 'watchwords)
+  #+end_src
+* FRAME POSITIONING
+  #+begin_src emacs-lisp
+    (defun set-initial-frame ()
+      "Defines and center the frame window"
+      (let* ((base-factor 0.72)
+	     (a-width (* (display-pixel-width) base-factor))
+	     (a-height (* (display-pixel-height) base-factor))
+	     (a-left (truncate (/ (- (display-pixel-width) a-width) 2)))
+	     (a-top (truncate (/ (- (display-pixel-height) a-height) 2))))
+	(set-frame-position (selected-frame) a-left a-top)
+	(set-frame-size (selected-frame) (truncate a-width) (truncate a-height) t)))
+
+    (setq frame-resize-pixelwise t)
+    (set-initial-frame)
   #+end_src
 * MAC CONFIGS
   #+begin_src emacs-lisp
@@ -118,7 +118,7 @@
       :config
       (setq doom-themes-enable-bold nil
 	    doom-themes-enable-italic nil)
-      (load-theme 'doom-vibrant t)
+      (load-theme 'doom-city-lights t)
       (doom-themes-visual-bell-config)
       (doom-themes-org-config))
 
@@ -449,6 +449,9 @@
 #+end_src
 * ESHELL
   #+begin_src emacs-lisp
+    (use-package shrink-path
+      :ensure t)
+
     (use-package esh-autosuggest
       :ensure t
       :hook (eshell-mode . esh-autosuggest-mode))
@@ -465,19 +468,17 @@
        eshell-destroy-buffer-when-process-dies t
        eshell-scroll-to-bottom-on-input 'all))
 
-    (defun eshell/clear ()
-      "Clear eshell buffer"
-      (interactive)
-      (let ((inhibit-read-only t)) (eshell/clear-scrollback)))
-
     (require 'magit)
     (defun display-git-prompt-branch ()
+      "Displays the git in the prompt."
       (if (not (null (magit-get-current-branch))) (concat "￨" (magit-get-current-branch)) ""))
 
     (defun get-first-char (str)
+      "Get first character of string STR."
       (if (zerop (length str)) "" (substring str 0 1)))
 
     (defun fill-window-with-char ()
+      "Fill the window width with one character acting as a line."
       (make-string (window-body-width) ?_))
 
     (defun pwd-shorten-dirs (pwd)
@@ -512,7 +513,7 @@
 
     (setq eshell-highlight-prompt nil)
 
-    ;; handle visual commands
+    ;; handle visual
     (require 'em-term)
     (add-to-list `eshell-visual-commands "top")
     (add-to-list `eshell-visual-subcommands '("git" "log" "diff" "show"))
@@ -525,10 +526,9 @@
     (setq eshell-command-aliases-list ())
 
     (defun +alias (al cmd)
-      "handy wrapper function to convert alias symbols to alias
-	    strings to avoid writing 4 quotes per alias. AL is a single-word
-	    symbol naming the alias, CMD is a list symbol describing the
-	    command."
+      "Handy wrapper function to convert alias symbols.
+    to alias strings to avoid writing 4 quotes per alias.
+    AL is a single-word symbol naming the alias, CMD is a list symbol describing the command."
       (add-to-list 'eshell-command-aliases-list
 		   (list (symbol-name al)
 			 (mapconcat 'symbol-name cmd " "))))
@@ -550,6 +550,8 @@
     (+alias 'd '(docker $*))
     (+alias 'dc '(docker-compose $*))
     (+alias 'dm '(docker-machine $*))
+
+    (+alias 'clear '(eshell/clear-scrollback))
 
     ;; HTTPie
     (+alias 'https '(http --default-scheme=https $*))
