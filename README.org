@@ -8,15 +8,15 @@
 * UI CLEANUP
    #+begin_src emacs-lisp
      ;; remove default menu bar
-     (menu-bar-mode -1)
+     (menu-bar-mode nil)
 
      ;; disable electric pair and show parent
-     (electric-pair-mode -1)
-     (show-paren-mode -1)
+     (electric-pair-mode nil)
+     (show-paren-mode nil)
 
      ;; hide both frame title bar and the icon
-     (setq ns-use-proxy-icon  -1
-	   frame-title-format -1)
+     (setq ns-use-proxy-icon  nil
+	   frame-title-format nil)
 
      ;; disable these GUI based behaviors
      (when window-system
@@ -25,13 +25,13 @@
        (tooltip-mode -1))
 
      ;; disable and customize startup message
-     (setq inhibit-startup-message 1
+     (setq inhibit-startup-message t
 	   initial-scratch-message ";; Happy Hacking\n")
    #+end_src
 * TEXT RENDERING
   #+begin_src emacs-lisp
     ;; define the font family and size
-    (set-frame-font "PragmataPro-14" nil t)
+    (set-frame-font "PragmataPro Liga-14" nil t)
 
     ;; set pragmatapro ligatures from external file
     (load-file "~/.emacs.d/pragmatapro-lig.el")
@@ -137,6 +137,9 @@
 
      ;; don't backup please. I got this
      (setq make-backup-files nil)
+
+     ;; disable recentf
+     (recentf-mode nil)
 
      ;; activate column-number-mode
      (column-number-mode t)
@@ -306,8 +309,8 @@
     (use-package lsp-mode
       :ensure t
       :config
-      ;; (add-hook 'python-mode-hook #'lsp)
-      ;; (add-hook 'dart-mode-hook #'lsp)
+      (add-hook 'python-mode-hook #'lsp)
+      (add-hook 'dart-mode-hook #'lsp)
       (setq lsp-prefer-flymake nil
 	    lsp-enable-on-type-formatting nil
 	    lsp-log-max 100000))
@@ -376,19 +379,18 @@
      ;; :hook (python-mode . blacken-mode))
    #+end_src
 ** DART
-** 
    #+begin_src emacs-lisp
      (use-package dart-mode
        :ensure t
        :after lsp
        :hook ((dart-mode . lsp)
-	      (after-save . (lambda () (flutter-run-or-hot-reload))))
+	      (after-save . flutter-hot-reload))
        :custom
        (dart-format-on-save t)
        (dart-sdk-path "~/flutter/bin/cache/dart-sdk/")
        (with-eval-after-load "projectile"
 	 (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
-	 (add-to-list 'projectile-project-root-files-bottom-up "BUILD")))
+	 (add-to-list 'projectile-project-root-files-bottom-up "build")))
 
      (use-package flutter
        :ensure t
@@ -396,6 +398,12 @@
        :bind (:map dart-mode-map ("C-M-x" . #'flutter-run-or-hot-reload))
        :custom (flutter-sdk-path "~/flutter/"))
    #+end_src
+** GROOVY
+#+begin_src emacs-lisp
+  (use-package groovy-mode
+    :ensure t
+    :mode "\\.groovy\\'\\|\\.gradle\\'")
+#+end_src
 ** COMMENT RUST
 #+begin_src emacs-lisp
   (use-package rust-mode
@@ -574,6 +582,6 @@
   #+end_src
 
 * COMMENT LOCAL VARIABLES
-# Local variables:
+# local variables:
 # eval: (add-hook 'after-save-hook (lambda nil (org-babel-tangle)) nil t)
 # end:
