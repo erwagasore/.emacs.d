@@ -152,7 +152,10 @@
      (use-package exec-path-from-shell
        :ensure t
        :if (memq window-system '(mac ns))
-       :config (exec-path-from-shell-initialize))
+       :config
+       (setenv "SHELL" "/bin/zsh")
+       (exec-path-from-shell-initialize)
+       (exec-path-from-shell-copy-env "PATH"))
 
      ;; setup hydra early so that it can be used everywhere
      (use-package hydra :ensure t)
@@ -334,7 +337,7 @@
 	    company-lsp-filter-candidates t))
 
     (use-package yasnippet
-      :defer 1
+      :ensure t
       :diminish yas-minor-mode
       :config
       (use-package yasnippet-snippets :ensure t)
@@ -383,11 +386,10 @@
      (use-package dart-mode
        :ensure t
        :after lsp
-       :hook ((dart-mode . lsp)
-	      (after-save . flutter-hot-reload))
+       :hook ((dart-mode . lsp))
        :custom
        (dart-format-on-save t)
-       (dart-sdk-path "~/flutter/bin/cache/dart-sdk/")
+       (dart-sdk-path "/usr/local/opt/dart/libexec")
        (with-eval-after-load "projectile"
 	 (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
 	 (add-to-list 'projectile-project-root-files-bottom-up "build")))
@@ -395,8 +397,14 @@
      (use-package flutter
        :ensure t
        :after dart-mode
-       :bind (:map dart-mode-map ("C-M-x" . #'flutter-run-or-hot-reload))
-       :custom (flutter-sdk-path "~/flutter/"))
+       :bind (:map dart-mode-map ("C-x C-s" . (lambda () (interactive) (save-buffer) (flutter-hot-reload))))
+       :custom (flutter-sdk-path "/usr/local/opt/flutter"))
+
+     (use-package flutter-l10n-flycheck
+       :ensure t
+       :after flutter
+       :config
+       (flutter-l10n-flycheck-setup))
    #+end_src
 ** LUA
    #+begin_src emacs-lisp
