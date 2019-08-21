@@ -132,43 +132,29 @@
   #+end_src
 * OTHER DEFAULTS
    #+begin_src emacs-lisp
-     ;; default directory for dire-mode
-     (setq default-directory "~/")
+	  ;; default directory for dire-mode
+	  (setq default-directory "~/")
 
-     ;; don't backup please. I got this
-     (setq make-backup-files nil)
+	  ;; don't backup please. I got this
+	  (setq make-backup-files nil)
 
-     ;; disable recentf
-     (recentf-mode nil)
+	  ;; disable recentf
+	  (recentf-mode nil)
 
-     ;; activate column-number-mode
-     (column-number-mode t)
-     (setq-default indicate-buffer-boundaries 'right)
+	  ;; activate column-number-mode
+	  (column-number-mode t)
+	  (setq-default indicate-buffer-boundaries 'right)
 
-     ;; delete marked region with 'DEL' key or backspace
-     (delete-selection-mode t)
+	  ;; delete marked region with 'DEL' key or backspace
+	  (delete-selection-mode t)
 
-     ;; set bash environment variables
-     (use-package exec-path-from-shell
-       :ensure t
-       :if (memq window-system '(mac ns))
-       :config
-       (setenv "SHELL" "/bin/zsh")
-       (exec-path-from-shell-initialize)
-       (exec-path-from-shell-copy-env "PATH"))
+	  ;; define abbrev file
+	  (setq abbrev-file-name (expand-file-name "abbrev.el" user-emacs-directory))
+	  (unless (file-exists-p abbrev-file-name)
+	    (write-region "" "" abbrev-file-name))
 
-     ;; setup hydra early so that it can be used everywhere
-     (use-package hydra :ensure t)
-     ;; extend use-package with :hydra keyword
-     (use-package use-package-hydra :ensure t)
-
-     ;; define abbrev file
-     (setq abbrev-file-name (expand-file-name "abbrev.el" user-emacs-directory))
-     (unless (file-exists-p abbrev-file-name)
-       (write-region "" "" abbrev-file-name))
-
-     ;; supress some warning
-     (setq ad-redefinition-action 'accept)
+	  ;; supress some warning
+	  (setq ad-redefinition-action 'accept)
    #+end_src
 * CURSOR STYLING
 #+begin_src emacs-lisp
