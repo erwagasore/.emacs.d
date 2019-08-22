@@ -558,6 +558,9 @@
     (+alias 'dc '(docker-compose $*))
     (+alias 'dm '(docker-machine $*))
 
+    ;; Clojure
+    (+alias 'clj '(clojure $*))
+
     (+alias 'clear '(eshell/clear-scrollback))
 
     ;; HTTPie
