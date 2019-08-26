@@ -77,8 +77,7 @@
     (defalias 'yes-or-no-p 'y-or-n-p)
 
     ;; Highlight the current line
-    (use-package hl-line
-      :hook (after-init . global-hl-line-mode))
+    (global-hl-line-mode t)
 
     ;; nice scrolling
     (setq scroll-margin 0
@@ -102,9 +101,11 @@
 * PACKAGE MANAGER
   #+begin_src emacs-lisp
     (require 'package)
+    (setq package-check-signature nil)
     (setq package-enable-at-startup nil)
     (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/"))
     (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+    (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
     (package-initialize)
 
     (unless (package-installed-p 'use-package)
@@ -185,14 +186,6 @@
       (which-key-separator " ")
       (which-key-prefix-prefix "+")
       :config (which-key-mode t))
-  #+end_src
-* COMMENT STANDALONE HYDRAS
-  #+begin_src emacs-lisp
-    (defhydra hydra-zoom (global-map "s-=")
-      "zoom"
-      ("n" text-scale-increase "in")
-      ("0" text-scale-adjust "equal")
-      ("p" text-scale-decrease "out"))
   #+end_src
 * COUNSEL
   #+begin_src emacs-lisp
@@ -404,7 +397,7 @@
     :mode "\\.groovy\\'\\|\\.gradle\\'")
    #+end_src
 
-** COMMENT RUST
+** RUST
    #+begin_src emacs-lisp
      (use-package toml-mode
        :ensure t)
@@ -469,10 +462,8 @@
 
     (use-package exec-path-from-shell
       :ensure t
-      :if (memq window-system '(mac ns x))
-      :config
-      (setq exec-path-from-shell-variables '("PATH" "GOPATH"))
-      (exec-path-from-shell-initialize))
+      :if (memq window-system '(mac ns))
+      :config (exec-path-from-shell-initialize))
 
     (use-package eshell
       :config
@@ -568,6 +559,9 @@
     (+alias 'd '(docker $*))
     (+alias 'dc '(docker-compose $*))
     (+alias 'dm '(docker-machine $*))
+
+    ;; Clojure
+    (+alias 'clj '(clojure $*))
 
     (+alias 'clear '(eshell/clear-scrollback))
 
