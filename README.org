@@ -294,6 +294,7 @@
       (add-hook 'python-mode-hook #'lsp)
       (add-hook 'dart-mode-hook #'lsp)
       (setq lsp-prefer-flymake nil
+	    lsp-dart-analysis-sdk-dir "/usr/local/opt/flutter/bin/cache/dart-sdk/"
 	    lsp-enable-on-type-formatting nil
 	    lsp-log-max 100000))
 
@@ -385,11 +386,7 @@
    #+begin_src emacs-lisp
      (use-package dart-mode
        :ensure t
-       :after lsp
-       :hook ((dart-mode . lsp))
-       :custom
-       (dart-format-on-save t)
-       (dart-sdk-path "/usr/local/opt/dart/libexec")
+       :config
        (with-eval-after-load "projectile"
 	 (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
 	 (add-to-list 'projectile-project-root-files-bottom-up "build")))
@@ -397,14 +394,7 @@
      (use-package flutter
        :ensure t
        :after dart-mode
-       :bind (:map dart-mode-map ("C-x C-s" . (lambda () (interactive) (save-buffer) (flutter-hot-reload))))
-       :custom (flutter-sdk-path "/usr/local/opt/flutter"))
-
-     (use-package flutter-l10n-flycheck
-       :ensure t
-       :after flutter
-       :config
-       (flutter-l10n-flycheck-setup))
+       :bind (:map dart-mode-map ("C-x C-s" . (lambda () (interactive) (save-buffer) (flutter-hot-reload)))))
    #+end_src
 ** LUA
    #+begin_src emacs-lisp
@@ -412,11 +402,11 @@
        :ensure t)
    #+end_src
 ** GROOVY
-#+begin_src emacs-lisp
+   #+begin_src emacs-lisp
   (use-package groovy-mode
     :ensure t
     :mode "\\.groovy\\'\\|\\.gradle\\'")
-#+end_src
+   #+end_src
 
 ** RUST
    #+begin_src emacs-lisp
@@ -428,13 +418,24 @@
      (use-package rust-mode
        :ensure t)
 
+     (use-package toml-mode
+       :ensure t)
+
+     (use-package rust-mode
+       :ensure t
+       :hook (rust-mode . lsp))
+
+     (use-package cargo
+       :ensure t
+       :hook (rust-mode . cargo-minor-mode))
+
      (use-package flycheck-rust
        :ensure t
        :after (rust-mode)
        :hook ((flycheck-mode . flycheck-rust-setup)))
    #+end_src
 ** COMMENT WEB
-#+begin_src emacs-lisp
+   #+begin_src emacs-lisp
   (use-package web-mode
     :defer 5
     :config
@@ -446,7 +447,7 @@
     (setq web-mode-code-indent-offset 2)
     (setq web-mode-attr-indent-offset 2)
     (setq web-mode-markup-indent-offset 2))
-#+end_src
+   #+end_src
 * CLI CLIENTS
 ** GIT
    #+begin_src emacs-lisp
@@ -479,10 +480,9 @@
       :hook (eshell-mode . esh-autosuggest-mode))
 
     (use-package exec-path-from-shell
-      :if (memq window-system '(mac ns))
       :ensure t
-      :config
-      (exec-path-from-shell-initialize))
+      :if (memq window-system '(mac ns))
+      :config (exec-path-from-shell-initialize))
 
     (use-package eshell
       :config
