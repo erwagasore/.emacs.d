@@ -417,14 +417,6 @@
 
 ** RUST
    #+begin_src emacs-lisp
-     (use-package cargo
-       :ensure t
-       :config
-       (add-hook 'rust-mode-hook #'cargo-minor-mode))
-
-     (use-package rust-mode
-       :ensure t)
-
      (use-package toml-mode
        :ensure t)
 
