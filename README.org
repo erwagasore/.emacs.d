@@ -363,6 +363,13 @@
    #+end_src
 ** DART
    #+begin_src emacs-lisp
+     (defun flutter-lsp-save ()
+       "Upgrade save in flutter to do formatting and hot-reload"
+       (interactive)
+       (lsp-format-buffer)
+       (save-buffer)
+       (flutter-run-or-hot-reload))
+
      (use-package dart-mode
        :ensure t
        :config
@@ -373,7 +380,7 @@
      (use-package flutter
        :ensure t
        :after dart-mode
-       :bind (:map dart-mode-map ("C-x C-s" . (lambda () (interactive) (save-buffer) (flutter-hot-reload)))))
+       :bind (:map dart-mode-map ("C-x C-s" . #'flutter-lsp-save)))
    #+end_src
 ** LUA
    #+begin_src emacs-lisp
