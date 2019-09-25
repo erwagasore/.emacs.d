@@ -293,6 +293,7 @@
       :config
       (add-hook 'python-mode-hook #'lsp)
       (add-hook 'dart-mode-hook #'lsp)
+      (add-hook 'js2-mode-hook #'lsp)
       (setq lsp-prefer-flymake nil
 	    lsp-dart-analysis-sdk-dir "/usr/local/opt/flutter/bin/cache/dart-sdk/"
 	    lsp-enable-on-type-formatting nil
@@ -372,6 +373,8 @@
    #+begin_src emacs-lisp
      (use-package lsp-python-ms
        :ensure t
+       :config
+       (add-to-list 'lsp-language-id-configuration '(python-mode . "python"))
        :hook (python-mode . (lambda () (require 'lsp-python-ms) (lsp))))
 
      ;; (use-package pyenv-mode :ensure t)
@@ -394,6 +397,7 @@
      (use-package dart-mode
        :ensure t
        :config
+       (add-to-list 'lsp-language-id-configuration '(dart-mode . "dart"))
        (with-eval-after-load "projectile"
 	 (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
 	 (add-to-list 'projectile-project-root-files-bottom-up "build")))
@@ -435,19 +439,13 @@
        :after (rust-mode)
        :hook ((flycheck-mode . flycheck-rust-setup)))
    #+end_src
-** COMMENT WEB
+** JAVASCRIPT
    #+begin_src emacs-lisp
-  (use-package web-mode
-    :defer 5
-    :config
-    (add-to-list 'auto-mode-alist '("\\.js[x]?\\'" . web-mode))
-    (add-to-list 'auto-mode-alist '("\\.mdx?\\'" . web-mode))
-    (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-  
-    (setq web-mode-content-types-alist '(("jsx" . "\\.js[x]?\\'")))
-    (setq web-mode-code-indent-offset 2)
-    (setq web-mode-attr-indent-offset 2)
-    (setq web-mode-markup-indent-offset 2))
+     (use-package js2-mode 
+       :ensure t
+       :mode "\\.js\\'"
+       :config (setq js-indent-level 2)
+       :hook (js2-mode . lsp))
    #+end_src
 * CLI CLIENTS
 ** GIT
