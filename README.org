@@ -35,7 +35,7 @@
 
     ;; set pragmatapro ligatures from external file
     (load-file "~/.emacs.d/pragmatapro-lig.el")
-    (pragmatapro-lig-global-mode t)
+    (pragmatapro-lig-global-mode)
 
     ;; define words with special meaning and activate them
     (defun watchwords ()
@@ -426,7 +426,7 @@
 
      (use-package rust-mode
        :ensure t
-       :config
+       :init
        (setq rust-format-on-save t)
        :hook (rust-mode . lsp))
 
@@ -441,11 +441,26 @@
    #+end_src
 ** JAVASCRIPT
    #+begin_src emacs-lisp
+     (use-package json-mode
+       :ensure t
+       :mode (("\\.json\\'" . json-mode)
+	      ("\\.tmpl\\'" . json-mode)
+	      ("\\.eslintrc\\'" . json-mode))
+       :config (setq-default js-indent-level 2))
+
+     (use-package json-reformat
+       :ensure t
+       :after json-mode
+       :bind (("C-c r" . json-reformat-region)))
+
      (use-package js2-mode 
        :ensure t
        :mode "\\.js\\'"
        :config (setq js-indent-level 2)
        :hook (js2-mode . lsp))
+
+     (use-package prettier-js
+       :init (add-hook 'js2-mode-hook 'prettier-js-mode))
    #+end_src
 * CLI CLIENTS
 ** GIT
