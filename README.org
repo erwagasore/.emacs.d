@@ -31,11 +31,7 @@
 * TEXT RENDERING
   #+begin_src emacs-lisp
     ;; define the font family and size
-    (set-frame-font "PragmataPro Liga-14" nil t)
-
-    ;; set pragmatapro ligatures from external file
-    (load-file "~/.emacs.d/pragmatapro-lig.el")
-    (pragmatapro-lig-global-mode)
+    (set-frame-font "PragmataPro-14" nil t)
 
     ;; define words with special meaning and activate them
     (defun watchwords ()
@@ -43,6 +39,24 @@
        nil '(("\\<\\(FIX\\(ME\\)?\\|TODO\\|HACK\\|REFACTOR\\|NOCOMMIT\\)"
 	      1 font-lock-warning-face t))))
     (add-hook 'prog-mode-hook 'watchwords)
+
+
+    (global-prettify-symbols-mode 1)
+    (defvar base-prettify-symbols-alist '(("<=" . ?≤)
+					  (">=" . ?≥)
+					  ("<-" . ?🡐)
+					  ("->" . ?🡒)
+					  ("lambda" . ?λ)))
+
+    (defun prettify-symbols-hook ()
+      "Set pretty symbols for programming modes."
+      (setq prettify-symbols-alist
+	    (append '(("==" . ?≡)
+		      ("!=" . ?≠)) base-prettify-symbols-alist)))
+
+    (add-hook 'prog-mode-hook 'prettify-symbols-hook)
+    (add-hook 'emacs-lisp-mode-hook 'prettify-symbols-hook)
+    (setq prettify-symbols-unprettify-at-point 'right-edge)
   #+end_src
 * FRAME POSITIONING
   #+begin_src emacs-lisp
@@ -460,6 +474,7 @@
        :hook (js2-mode . lsp))
 
      (use-package prettier-js
+       :ensure t
        :init (add-hook 'js2-mode-hook 'prettier-js-mode))
    #+end_src
 * CLI CLIENTS
