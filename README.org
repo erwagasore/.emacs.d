@@ -486,6 +486,8 @@
 #+end_src
 * ESHELL
   #+begin_src emacs-lisp
+    (setenv "PAGER" "cat")
+
     (use-package shrink-path
       :ensure t)
 
@@ -496,7 +498,14 @@
     (use-package exec-path-from-shell
       :ensure t
       :if (memq window-system '(mac ns))
-      :config (exec-path-from-shell-initialize))
+      :config
+      (exec-path-from-shell-initialize)
+      (exec-path-from-shell-copy-env "LANG")
+      (exec-path-from-shell-copy-env "LC_CTYPE")
+      (exec-path-from-shell-copy-env "LC_NUMERIC")
+      (exec-path-from-shell-copy-env "LC_ALL")
+      (exec-path-from-shell-copy-env "HOME")
+      (exec-path-from-shell-copy-env "PERSONAL_ACCESS_TOKEN"))
 
     (use-package eshell
       :config
@@ -509,6 +518,10 @@
        eshell-prefer-lisp-functions nil
        eshell-destroy-buffer-when-process-dies t
        eshell-scroll-to-bottom-on-input 'all))
+
+    (use-package eshell-fringe-status
+      :config
+      (add-hook 'eshell-mode-hook 'eshell-fringe-status-mode))
 
     (require 'magit)
     (defun display-git-prompt-branch ()
