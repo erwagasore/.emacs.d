@@ -757,6 +757,7 @@
   (use-package docker-compose-mode :ensure t)
   (use-package docker-tramp :ensure t)
 #+end_src
+
 * ESHELL
   #+begin_src emacs-lisp
     (setenv "PAGER" "cat")
@@ -796,10 +797,14 @@
       :config
       (add-hook 'eshell-mode-hook 'eshell-fringe-status-mode))
 
-    (require 'magit)
+    (defun git-get-current-branch ()
+      "Get git branch in the current directorh."
+      (s-trim (shell-command-to-string (concat "git rev-parse --abbrev-ref HEAD"))))
+
     (defun display-git-prompt-branch ()
       "Displays the git in the prompt."
-      (if (not (null (magit-get-current-branch))) (concat "￨" (magit-get-current-branch)) ""))
+      (if (not (null (git-get-current-branch))) (concat "￨" (git-get-current-branch)) ""))
+
 
     (defun get-first-char (str)
       "Get first character of string STR."
@@ -822,8 +827,8 @@
     (setq eshell-prompt-function
 	  (lambda nil
 	    (concat
-	     (propertize (fill-window-with-char) 'face '(:foreground "#234768"))
 	     (propertize "\n" 'face nil)
+	     (propertize "\n" 'face '(:background "#181F25"))
 	     (propertize "╭⟢" 'face '(:foreground "#A2DEB2"))
 	     (propertize " " 'face nil)
 	     (propertize (user-login-name) 'face '(:foreground "#5DC078"))
@@ -842,10 +847,10 @@
     (setq eshell-highlight-prompt nil)
 
     ;; handle visual
-    (require 'em-term)
-    (add-to-list `eshell-visual-commands "top")
-    (add-to-list `eshell-visual-subcommands '("git" "log" "diff" "show"))
-    (add-to-list `eshell-visual-options '("git" "--help"))
+    ;; (require 'em-term)
+    ;; (add-to-list `eshell-visual-commands "top")
+    ;; (add-to-list `eshell-visual-subcommands '("git" ("log" "diff")))
+    ;; (add-to-list `eshell-visual-options '("git" "--help"))
 
     ;; Set this to match eshell-prompt-function
     (setq eshell-prompt-regexp "^╰🡢 ")
