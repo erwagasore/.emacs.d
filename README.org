@@ -562,10 +562,15 @@
   #+begin_src emacs-lisp
     (use-package lsp-mode
       :ensure t
+      :hook (
+	     (sh-mode . lsp)
+	     (python-mode . lsp)
+	     (dart-mode . lsp)
+	     (js2-mode . lsp))
       :config
-      (add-hook 'python-mode-hook #'lsp)
-      (add-hook 'dart-mode-hook #'lsp)
-      (add-hook 'js2-mode-hook #'lsp)
+      ;; (add-hook 'python-mode-hook #'lsp)
+      ;; (add-hook 'dart-mode-hook #'lsp)
+      ;; (add-hook 'js2-mode-hook #'lsp)
       (setq lsp-prefer-flymake nil
 	    lsp-dart-analysis-sdk-dir "/usr/local/opt/flutter/bin/cache/dart-sdk/"
 	    lsp-enable-on-type-formatting nil
