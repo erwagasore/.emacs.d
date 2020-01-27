@@ -794,6 +794,7 @@
        eshell-error-if-no-glob t
        eshell-cmpl-ignore-case t
        eshell-save-history-on-exit t
+       eshell-history-size 1024
        eshell-prefer-lisp-functions nil
        eshell-destroy-buffer-when-process-dies t
        eshell-scroll-to-bottom-on-input 'all))
@@ -803,8 +804,9 @@
       (add-hook 'eshell-mode-hook 'eshell-fringe-status-mode))
 
     (defun git-get-current-branch ()
-      "Get git branch in the current directorh."
-      (s-trim (shell-command-to-string (concat "git rev-parse --abbrev-ref HEAD"))))
+      "Get git branch in the current directory."
+      (when (and (eshell-search-path "git") (locate-dominating-file (eshell/pwd) ".git"))
+	(s-trim (shell-command-to-string (concat "git rev-parse --abbrev-ref HEAD")))))
 
     (defun display-git-prompt-branch ()
       "Displays the git in the prompt."
