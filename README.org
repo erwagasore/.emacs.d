@@ -31,7 +31,7 @@
 * TEXT RENDERING
   #+begin_src emacs-lisp
     ;; define the font family and size
-    (set-frame-font "PragmataPro Mono Liga-14" nil t)
+    (set-frame-font "PragmataPro-13" nil t)
 
     (setq prettify-symbols-unprettify-at-point 'right-edge)
 
@@ -398,6 +398,10 @@
     (use-package doom-modeline
       :ensure t
       :hook (after-init . doom-modeline-mode))
+
+    (use-package winum
+      :ensure t
+      :config (winum-mode))
 
     (use-package all-the-icons
       :ensure t
