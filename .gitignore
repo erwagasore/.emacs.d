@@ -9,7 +9,6 @@ elpa
 /tramp
 
 README.el
-custom.el
 themes/
 /.mc-lists.el
 /.org-id-locations
