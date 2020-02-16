@@ -30,6 +30,11 @@
    #+end_src
 * TEXT RENDERING
   #+begin_src emacs-lisp
+    ;;; use UTF-8 everywhere
+    (set-terminal-coding-system 'utf-8)
+    (set-keyboard-coding-system 'utf-8)
+    (prefer-coding-system 'utf-8)
+
     ;; define the font family and size
     (set-frame-font "PragmataPro-13" nil t)
 
@@ -572,13 +577,10 @@
 	     (dart-mode . lsp)
 	     (js2-mode . lsp))
       :config
-      ;; (add-hook 'python-mode-hook #'lsp)
-      ;; (add-hook 'dart-mode-hook #'lsp)
-      ;; (add-hook 'js2-mode-hook #'lsp)
       (setq lsp-prefer-flymake nil
 	    lsp-dart-analysis-sdk-dir "/usr/local/opt/flutter/bin/cache/dart-sdk/"
 	    lsp-enable-on-type-formatting nil
-	    lsp-log-max 100000))
+	    lsp-log-max 1000))
 
     (use-package lsp-ui
       :ensure t
