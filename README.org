@@ -628,7 +628,8 @@
 	     (js2-mode . lsp))
       :config
       (setq lsp-prefer-flymake nil
-	    lsp-dart-analysis-sdk-dir "/usr/local/opt/flutter/bin/cache/dart-sdk/"
+	    lsp-dart-sdk-dir "/usr/local/Caskroom/flutter/latest/flutter/bin/cache/dart-sdk"
+	    ;; lsp-dart-analysis-sdk-dir "/usr/local/Caskroom/flutter/latest/flutter/bin/cache/dart-sdk/"
 	    lsp-enable-on-type-formatting nil
 	    lsp-log-max 1000))
 
@@ -770,7 +771,8 @@
      (use-package flycheck-rust
        :ensure t
        :after (rust-mode)
-       :hook ((flycheck-mode . flycheck-rust-setup)))
+       :hook ((rust-mode . flycheck-rust-setup)
+	      (flycheck-mode . flycheck-rust-setup)))
    #+end_src
 ** JAVASCRIPT
    #+begin_src emacs-lisp
