@@ -619,44 +619,43 @@
   #+end_src
 * LSP
   #+begin_src emacs-lisp
-    (use-package lsp-mode
-      :ensure t
-      :hook (
-	     (sh-mode . lsp)
-	     (python-mode . lsp)
-	     (dart-mode . lsp)
-	     (js2-mode . lsp))
-      :config
-      (setq lsp-prefer-flymake nil
-	    lsp-dart-sdk-dir "/usr/local/Caskroom/flutter/latest/flutter/bin/cache/dart-sdk"
-	    ;; lsp-dart-analysis-sdk-dir "/usr/local/Caskroom/flutter/latest/flutter/bin/cache/dart-sdk/"
-	    lsp-enable-on-type-formatting nil
-	    lsp-log-max 1000))
+	(use-package lsp-mode
+	  :ensure t
+	  :hook (
+		 (sh-mode . lsp)
+		 (python-mode . lsp)
+		 (dart-mode . lsp)
+		 (js2-mode . lsp))
+	  :config
+	  (setq lsp-prefer-flymake nil
+		lsp-dart-sdk-dir "/usr/local/Caskroom/flutter/latest/flutter/bin/cache/dart-sdk"
+		lsp-enable-on-type-formatting nil
+		lsp-log-max 1000))
 
-    (use-package lsp-ui
-      :ensure t
-      :requires lsp-mode flycheck
-      :config
-      (setq lsp-ui-sideline-enable t
-	    lsp-ui-sideline-show-symbol nil)
-      :hook (lsp-mode . lsp-ui-mode))
+	(use-package lsp-ui
+	  :ensure t
+	  :requires lsp-mode flycheck
+	  :config
+	  (setq lsp-ui-sideline-enable t
+		lsp-ui-sideline-show-symbol nil)
+	  :hook (lsp-mode . lsp-ui-mode))
 
-    (use-package company-lsp
-      :ensure t
-      :requires company
-      :config
-      (push 'company-lsp company-backends)
-      (setq company-transformers nil
-	    company-lsp-async t
-	    company-lsp-cache-candidates 'auto
-	    company-lsp-filter-candidates t))
+	(use-package company-lsp
+	  :ensure t
+	  :requires company
+	  :config
+	  (push 'company-lsp company-backends)
+	  (setq company-transformers nil
+		company-lsp-async t
+		company-lsp-cache-candidates 'auto
+		company-lsp-filter-candidates t))
 
-    (use-package yasnippet
-      :ensure t
-      :diminish yas-minor-mode
-      :config
-      (use-package yasnippet-snippets :ensure t)
-      (yas-global-mode t))
+	(use-package yasnippet
+	  :ensure t
+	  :diminish yas-minor-mode
+	  :config
+	  (use-package yasnippet-snippets :ensure t)
+	  (yas-global-mode t))
   #+end_src
 * LANGUAGE UTILS
   #+begin_src emacs-lisp
@@ -738,8 +737,8 @@
 
      (use-package flutter
        :ensure t
-       :after dart-mode
-       :bind (:map dart-mode-map ("C-x C-s" . #'flutter-lsp-save)))
+       :after dart-mode)
+       ;; :bind (:map dart-mode-map ("C-x C-s" . #'flutter-lsp-save))
    #+end_src
 ** LUA
    #+begin_src emacs-lisp
