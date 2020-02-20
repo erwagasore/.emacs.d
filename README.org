@@ -725,7 +725,9 @@
        (interactive)
        (lsp-format-buffer)
        (save-buffer)
-       (flutter-run-or-hot-reload))
+       (if (flutter--running-p)
+	   (flutter-hot-reload)))
+
 
      (use-package dart-mode
        :ensure t
@@ -737,8 +739,8 @@
 
      (use-package flutter
        :ensure t
-       :after dart-mode)
-       ;; :bind (:map dart-mode-map ("C-x C-s" . #'flutter-lsp-save))
+       :after dart-mode
+       :bind (:map dart-mode-map ("C-x C-s" . #'flutter-lsp-save))
    #+end_src
 ** LUA
    #+begin_src emacs-lisp
