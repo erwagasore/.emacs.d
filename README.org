@@ -740,7 +740,7 @@
      (use-package flutter
        :ensure t
        :after dart-mode
-       :bind (:map dart-mode-map ("C-x C-s" . #'flutter-lsp-save))
+       :bind (:map dart-mode-map ("C-x C-s" . #'flutter-lsp-save)))
    #+end_src
 ** LUA
    #+begin_src emacs-lisp
