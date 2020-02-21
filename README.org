@@ -586,242 +586,6 @@
       :ensure t
       :config (company-flx-mode t))
   #+end_src
-* ORG
-  #+begin_src emacs-lisp
-    (use-package org
-     :ensure org-plus-contrib
-     :config (setq
-	      org-src-fontify-natively t
-	      org-src-tab-acts-natively t
-	      org-todo-keywords '((sequence "BACKLOG(b)" "TODO(t)" "DOING(n)" "|" "DONE(d)")
-				  (sequence "|"  "ONHOLD(h)" "CANCELED(c)"))
-	      org-agenda-files '("~/.org/agenda.org")))
-
-
-    (use-package restclient
-      :ensure t
-      :config (add-hook 'restclient-mode-hook 'company-restclient))
-
-    (use-package company-restclient
-      :ensure t
-      :config
-      (progn
-	(add-hook 'restclient-mode-hook
-		  (lambda ()
-		    (set (make-local-variable 'company-backends)'(company-restclient))
-		    (company-mode t)))))
-
-    (use-package ob-restclient
-      :ensure t
-      :config 
-      (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
-
-  #+end_src
-* LSP
-  #+begin_src emacs-lisp
-	(use-package lsp-mode
-	  :ensure t
-	  :hook (
-		 (sh-mode . lsp)
-		 (python-mode . lsp)
-		 (dart-mode . lsp)
-		 (js2-mode . lsp))
-	  :config
-	  (setq lsp-prefer-flymake nil
-		lsp-dart-sdk-dir "/usr/local/Caskroom/flutter/latest/flutter/bin/cache/dart-sdk"
-		lsp-enable-on-type-formatting nil
-		lsp-log-max 1000))
-
-	(use-package lsp-ui
-	  :ensure t
-	  :requires lsp-mode flycheck
-	  :config
-	  (setq lsp-ui-sideline-enable t
-		lsp-ui-sideline-show-symbol nil)
-	  :hook (lsp-mode . lsp-ui-mode))
-
-	(use-package company-lsp
-	  :ensure t
-	  :requires company
-	  :config
-	  (push 'company-lsp company-backends)
-	  (setq company-transformers nil
-		company-lsp-async t
-		company-lsp-cache-candidates 'auto
-		company-lsp-filter-candidates t))
-
-	(use-package yasnippet
-	  :ensure t
-	  :diminish yas-minor-mode
-	  :config
-	  (use-package yasnippet-snippets :ensure t)
-	  (yas-global-mode t))
-  #+end_src
-* LANGUAGE UTILS
-  #+begin_src emacs-lisp
-    (use-package smartparens
-      :ensure t
-      :config (progn (show-smartparens-global-mode t))
-      :hook (prog-mode . turn-on-smartparens-mode))
-
-    (use-package rainbow-delimiters
-      :ensure t
-      :hook (prog-mode . rainbow-delimiters-mode))
-
-    (use-package highlight-indent-guides
-      :ensure t
-      :hook (prog-mode . highlight-indent-guides-mode)
-      :custom
-      (highlight-indent-guides-character ?\│)
-      (highlight-indent-guides-auto-odd-face-perc 2)
-      (highlight-indent-guides-auto-even-face-perc 2)
-      (highlight-indent-guides-auto-character-face-perc 8)
-      (highlight-indent-guides-method 'character)
-      (highlight-indent-guides-responsive 'character)
-      (highlight-indent-guides-delay 0))
-  #+end_src
-* LANGUAGES
-** CLOJURE
-   #+begin_src emacs-lisp
-     (use-package clojure-mode
-       :ensure t
-       :config (yas-global-mode t))
-
-     (use-package flycheck-joker
-       :ensure t)
-
-     (use-package lsp-mode
-       :ensure t
-       :commands lsp
-       :config
-       (add-to-list 'lsp-language-id-configuration '(clojure-mode . "clojure-mode"))
-       (add-to-list 'lsp-language-id-configuration '(clojurescript-mode . "clojure-mode"))
-       :init
-       (setq lsp-enable-indentation nil)
-       (add-hook 'clojure-mode-hook #'lsp)
-       (add-hook 'clojurec-mode-hook #'lsp)
-       (add-hook 'clojurescript-mode-hook #'lsp))
-   #+end_src
-** PYTHON
-   #+begin_src emacs-lisp
-     (use-package lsp-python-ms
-       :ensure t
-       :config
-       (add-to-list 'lsp-language-id-configuration '(python-mode . "python"))
-       :hook (python-mode . (lambda () (require 'lsp-python-ms) (lsp))))
-
-     ;; (use-package pyenv-mode :ensure t)
-
-     ;; (use-package pyenv-mode-auto :ensure t)
-
-     ;; (use-package blacken
-     ;; :after python
-     ;; :hook (python-mode . blacken-mode))
-   #+end_src
-** DART
-   #+begin_src emacs-lisp
-     (defun flutter-lsp-save ()
-       "Upgrade save in flutter to do formatting and hot-reload"
-       (interactive)
-       (lsp-format-buffer)
-       (save-buffer)
-       (if (flutter--running-p)
-	   (flutter-hot-reload)))
-
-
-     (use-package dart-mode
-       :ensure t
-       :config
-       (add-to-list 'lsp-language-id-configuration '(dart-mode . "dart"))
-       (with-eval-after-load "projectile"
-	 (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
-	 (add-to-list 'projectile-project-root-files-bottom-up "build")))
-
-     (use-package flutter
-       :ensure t
-       :after dart-mode
-       :bind (:map dart-mode-map ("C-x C-s" . #'flutter-lsp-save))
-   #+end_src
-** LUA
-   #+begin_src emacs-lisp
-     (use-package lua-mode
-       :ensure t)
-   #+end_src
-** GROOVY
-   #+begin_src emacs-lisp
-  (use-package groovy-mode
-    :ensure t
-    :mode "\\.groovy\\'\\|\\.gradle\\'")
-   #+end_src
-
-** RUST
-   #+begin_src emacs-lisp
-     (use-package toml-mode
-       :ensure t)
-
-     (use-package rust-mode
-       :ensure t
-       :init
-       (setq rust-format-on-save t)
-       :hook (rust-mode . lsp))
-
-     (use-package cargo
-       :ensure t
-       :hook (rust-mode . cargo-minor-mode))
-
-     (use-package flycheck-rust
-       :ensure t
-       :after (rust-mode)
-       :hook ((rust-mode . flycheck-rust-setup)
-	      (flycheck-mode . flycheck-rust-setup)))
-   #+end_src
-** JAVASCRIPT
-   #+begin_src emacs-lisp
-     (use-package json-mode
-       :ensure t
-       :mode (("\\.json\\'" . json-mode)
-	      ("\\.tmpl\\'" . json-mode)
-	      ("\\.eslintrc\\'" . json-mode))
-       :config (setq-default js-indent-level 2))
-
-     (use-package json-reformat
-       :ensure t
-       :after json-mode
-       :bind (("C-c r" . json-reformat-region)))
-
-     (use-package js2-mode 
-       :ensure t
-       :mode "\\.js\\'"
-       :config (setq js-indent-level 2)
-       :hook (js2-mode . lsp))
-
-     (use-package prettier-js
-       :ensure t
-       :init (add-hook 'js2-mode-hook 'prettier-js-mode))
-   #+end_src
-* CLI CLIENTS
-** GIT
-   #+begin_src emacs-lisp
-     (use-package magit
-       :ensure t
-       :init (magit-auto-revert-mode -1)
-       :bind ("C-x g" . magit-status))
-
-     (if (display-graphic-p)
-	 (use-package git-gutter-fringe
-	   :ensure t
-	   :init (global-git-gutter-mode))
-       (use-package git-gutter
-	 :ensure t
-	 :init (global-git-gutter-mode)))
-#+end_src
-** DOCKER
-#+begin_src emacs-lisp
-  (use-package dockerfile-mode :ensure t)
-  (use-package docker-compose-mode :ensure t)
-  (use-package docker-tramp :ensure t)
-#+end_src
-
 * ESHELL
   #+begin_src emacs-lisp
     (setenv "PAGER" "cat")
@@ -958,6 +722,250 @@
     ;; HTTPie
     (+alias 'https '(http --default-scheme=https $*))
   #+end_src
+* ORG
+  #+begin_src emacs-lisp
+    (use-package org
+     :ensure org-plus-contrib
+     :config (setq
+	      org-src-fontify-natively t
+	      org-src-tab-acts-natively t
+	      org-todo-keywords '((sequence "BACKLOG(b)" "TODO(t)" "DOING(n)" "|" "DONE(d)")
+				  (sequence "|"  "ONHOLD(h)" "CANCELED(c)"))
+	      org-agenda-files '("~/.org/agenda.org")))
+
+
+    (use-package restclient
+      :ensure t
+      :config (add-hook 'restclient-mode-hook 'company-restclient))
+
+    (use-package company-restclient
+      :ensure t
+      :config
+      (progn
+	(add-hook 'restclient-mode-hook
+		  (lambda ()
+		    (set (make-local-variable 'company-backends)'(company-restclient))
+		    (company-mode t)))))
+
+    (use-package ob-restclient
+      :ensure t
+      :config 
+      (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
+
+  #+end_src
+* LSP
+  #+begin_src emacs-lisp
+    (defun get-dart-path ()
+      (string-trim-right
+       (car
+	(seq-filter
+	 (lambda (str) (string-match "dart" str))
+	 (split-string (getenv "PATH") ":")))
+       "/bin"))
+
+    (use-package lsp-mode
+      :ensure t
+      :hook (
+	     (sh-mode . lsp)
+	     (python-mode . lsp)
+	     (dart-mode . lsp)
+	     (js2-mode . lsp))
+      :config
+      (setq lsp-prefer-flymake nil
+	    lsp-dart-sdk-dir (get-dart-path)
+	    lsp-enable-on-type-formatting nil
+	    lsp-log-max 1000))
+
+    (use-package lsp-ui
+      :ensure t
+      :requires lsp-mode flycheck
+      :config
+      (setq lsp-ui-sideline-enable t
+	    lsp-ui-sideline-show-symbol nil)
+      :hook (lsp-mode . lsp-ui-mode))
+
+    (use-package company-lsp
+      :ensure t
+      :requires company
+      :config
+      (push 'company-lsp company-backends)
+      (setq company-transformers nil
+	    company-lsp-async t
+	    company-lsp-cache-candidates 'auto
+	    company-lsp-filter-candidates t))
+
+    (use-package yasnippet
+      :ensure t
+      :diminish yas-minor-mode
+      :config
+      (use-package yasnippet-snippets :ensure t)
+      (yas-global-mode t))
+  #+end_src
+* LANGUAGE UTILS
+  #+begin_src emacs-lisp
+    (use-package smartparens
+      :ensure t
+      :config (progn (show-smartparens-global-mode t))
+      :hook (prog-mode . turn-on-smartparens-mode))
+
+    (use-package rainbow-delimiters
+      :ensure t
+      :hook (prog-mode . rainbow-delimiters-mode))
+
+    (use-package highlight-indent-guides
+      :ensure t
+      :hook (prog-mode . highlight-indent-guides-mode)
+      :custom
+      (highlight-indent-guides-character ?\│)
+      (highlight-indent-guides-auto-odd-face-perc 2)
+      (highlight-indent-guides-auto-even-face-perc 2)
+      (highlight-indent-guides-auto-character-face-perc 8)
+      (highlight-indent-guides-method 'character)
+      (highlight-indent-guides-responsive 'character)
+      (highlight-indent-guides-delay 0))
+  #+end_src
+* LANGUAGES
+** CLOJURE
+   #+begin_src emacs-lisp
+     (use-package clojure-mode
+       :ensure t
+       :config (yas-global-mode t))
+
+     (use-package flycheck-joker
+       :ensure t)
+
+     (use-package lsp-mode
+       :ensure t
+       :commands lsp
+       :config
+       (add-to-list 'lsp-language-id-configuration '(clojure-mode . "clojure-mode"))
+       (add-to-list 'lsp-language-id-configuration '(clojurescript-mode . "clojure-mode"))
+       :init
+       (setq lsp-enable-indentation nil)
+       (add-hook 'clojure-mode-hook #'lsp)
+       (add-hook 'clojurec-mode-hook #'lsp)
+       (add-hook 'clojurescript-mode-hook #'lsp))
+   #+end_src
+** PYTHON
+   #+begin_src emacs-lisp
+     (use-package lsp-python-ms
+       :ensure t
+       :config
+       (add-to-list 'lsp-language-id-configuration '(python-mode . "python"))
+       :hook (python-mode . (lambda () (require 'lsp-python-ms) (lsp))))
+
+     ;; (use-package pyenv-mode :ensure t)
+
+     ;; (use-package pyenv-mode-auto :ensure t)
+
+     ;; (use-package blacken
+     ;; :after python
+     ;; :hook (python-mode . blacken-mode))
+   #+end_src
+** DART
+   #+begin_src emacs-lisp
+     (defun flutter-lsp-save ()
+       "Upgrade save in flutter to do formatting and hot-reload"
+       (interactive)
+       (lsp-format-buffer)
+       (save-buffer)
+       (if (flutter--running-p)
+	   (flutter-hot-reload)))
+
+
+     (use-package dart-mode
+       :ensure t
+       :config
+       (add-to-list 'lsp-language-id-configuration '(dart-mode . "dart"))
+       (with-eval-after-load "projectile"
+	 (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
+	 (add-to-list 'projectile-project-root-files-bottom-up "build")))
+
+     (use-package flutter
+       :ensure t
+       :after dart-mode
+       :bind (:map dart-mode-map ("C-x C-s" . #'flutter-lsp-save)))
+   #+end_src
+** LUA
+   #+begin_src emacs-lisp
+     (use-package lua-mode
+       :ensure t)
+   #+end_src
+** GROOVY
+   #+begin_src emacs-lisp
+  (use-package groovy-mode
+    :ensure t
+    :mode "\\.groovy\\'\\|\\.gradle\\'")
+   #+end_src
+
+** RUST
+   #+begin_src emacs-lisp
+     (use-package toml-mode
+       :ensure t)
+
+     (use-package rust-mode
+       :ensure t
+       :init
+       (setq rust-format-on-save t)
+       :hook (rust-mode . lsp))
+
+     (use-package cargo
+       :ensure t
+       :hook (rust-mode . cargo-minor-mode))
+
+     (use-package flycheck-rust
+       :ensure t
+       :after (rust-mode)
+       :hook ((rust-mode . flycheck-rust-setup)
+	      (flycheck-mode . flycheck-rust-setup)))
+   #+end_src
+** JAVASCRIPT
+   #+begin_src emacs-lisp
+     (use-package json-mode
+       :ensure t
+       :mode (("\\.json\\'" . json-mode)
+	      ("\\.tmpl\\'" . json-mode)
+	      ("\\.eslintrc\\'" . json-mode))
+       :config (setq-default js-indent-level 2))
+
+     (use-package json-reformat
+       :ensure t
+       :after json-mode
+       :bind (("C-c r" . json-reformat-region)))
+
+     (use-package js2-mode 
+       :ensure t
+       :mode "\\.js\\'"
+       :config (setq js-indent-level 2)
+       :hook (js2-mode . lsp))
+
+     (use-package prettier-js
+       :ensure t
+       :init (add-hook 'js2-mode-hook 'prettier-js-mode))
+   #+end_src
+* CLI CLIENTS
+** GIT
+   #+begin_src emacs-lisp
+     (use-package magit
+       :ensure t
+       :init (magit-auto-revert-mode -1)
+       :bind ("C-x g" . magit-status))
+
+     (if (display-graphic-p)
+	 (use-package git-gutter-fringe
+	   :ensure t
+	   :init (global-git-gutter-mode))
+       (use-package git-gutter
+	 :ensure t
+	 :init (global-git-gutter-mode)))
+#+end_src
+** DOCKER
+#+begin_src emacs-lisp
+  (use-package dockerfile-mode :ensure t)
+  (use-package docker-compose-mode :ensure t)
+  (use-package docker-tramp :ensure t)
+#+end_src
+
 * CUSTOM.EL CONFIG FILE
   #+begin_src emacs-lisp
     (add-hook
