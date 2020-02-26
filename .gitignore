@@ -23,6 +23,7 @@ url/
 /clear
 /transient/*
 *.eld
+*.elc
 *.data
 /straight/*
 /amx-items
