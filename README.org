@@ -44,7 +44,6 @@
     (require 'pragmatapro-lig)
     (pragmatapro-lig-global-mode)
 
-    (add-hook 'prog-mode-hook #'prettify-hook)
     (global-prettify-symbols-mode +1)
   #+end_src
 * FRAME POSITIONING
