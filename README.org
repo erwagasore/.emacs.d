@@ -402,53 +402,8 @@
 
     (setq eshell-highlight-prompt nil)
 
-    ;; handle visual
-    ;; (require 'em-term)
-    ;; (add-to-list `eshell-visual-commands "top")
-    ;; (add-to-list `eshell-visual-subcommands '("git" ("log" "diff")))
-    ;; (add-to-list `eshell-visual-options '("git" "--help"))
-
     ;; Set this to match eshell-prompt-function
     (setq eshell-prompt-regexp "^╰🡢 ")
-
-    ;; define portable aliases
-    (setq eshell-command-aliases-list ())
-
-    (defun +alias (al cmd)
-      "Handy wrapper function to convert alias symbols.
-    to alias strings to avoid writing 4 quotes per alias.
-    AL is a single-word symbol naming the alias, CMD is a list symbol describing the command."
-      (add-to-list 'eshell-command-aliases-list
-		   (list (symbol-name al)
-			 (mapconcat 'symbol-name cmd " "))))
-
-    ;; actual aliases
-    (+alias 'ls '(exa --color=always))
-    (+alias 'la     '(exa --all --group --color=always))
-    (+alias 'll     '(exa --long --group --color=always))
-    (+alias 'l      '(exa --all --all --long --group --header --color=always))
-    (+alias 'tree '(exa --tree --long --color=always))
-    ;; (+alias 'lt     '(ls -ltr $*))
-    (+alias '..     '(cd ..))
-    (+alias '...    '(cd ../..))
-    (+alias '....   '(cd ../../..))
-    (+alias '.....  '(cd ../../../..))
-    (+alias 'md     '(mkdir -p))
-    (+alias 'emacs  '(find-file $1))
-    (+alias 'less   '(find-file-read-only $1))
-
-    ;; Docker
-    (+alias 'd '(docker $*))
-    (+alias 'dc '(docker-compose $*))
-    (+alias 'dm '(docker-machine $*))
-
-    ;; Clojure
-    (+alias 'clj '(clojure $*))
-
-    (+alias 'clear '(eshell/clear-scrollback))
-
-    ;; HTTPie
-    (+alias 'https '(http --default-scheme=https $*))
   #+end_src
 * ORG
   #+begin_src emacs-lisp

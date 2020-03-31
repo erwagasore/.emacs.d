@@ -1,0 +1,26 @@
+alias .. cd ..
+alias ... cd ../..
+alias .... cd ../../..
+alias ..... cd ../../../..
+
+alias ls exa --color=always
+alias ls exa --color=always
+alias la exa --all --group --color=always
+alias ll exa --long --group --color=always
+alias l exa --all --all --long --group --color=always
+alias tree exa --tree --long --color=always
+
+alias md mkdir -p
+alias clear eshell/clear-scrollback
+alias emacs find-file $1
+alias less find-file-read-only $1
+
+alias d docker $*
+alias dc docker-compose $*
+alias dm docker-machine $*
+alias https http --default-scheme=https $*
+
+
+
+
+

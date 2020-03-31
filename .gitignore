@@ -13,7 +13,8 @@ themes/
 /.mc-lists.el
 /.org-id-locations
 anaconda-mode
-eshell/
+eshell/*
+!eshell/alias
 url/
 /nov-places
 /init.el*
