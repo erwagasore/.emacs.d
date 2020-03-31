@@ -1,4 +1,4 @@
-~#+PROPERTY: header-args :tangle init.el :comments yes :results silent
+#+PROPERTY: header-args :tangle init.el :comments yes :results silent
 * BUMP GARBAGE COLLECTION
   #+begin_src emacs-lisp
     ;; Make startup faster by reducing the frequency of garbage
