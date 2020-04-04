@@ -3,7 +3,7 @@
   #+begin_src emacs-lisp
     ;; Make startup faster by reducing the frequency of garbage
     ;; collection.  The default is 800 kilobytes.  Measured in bytes.
-    (setq gc-cons-threshold (* 512 1000 1000))
+    (setq gc-cons-threshold (* 96 1024 1024))
   #+end_src
 * UI CLEANUP
    #+begin_src emacs-lisp
@@ -139,29 +139,29 @@
   #+end_src
 * OTHER DEFAULTS
    #+begin_src emacs-lisp
-	  ;; default directory for dire-mode
-	  (setq default-directory "~/")
+     ;; default directory for dire-mode
+     (setq default-directory "~/")
 
-	  ;; don't backup please. I got this
-	  (setq make-backup-files nil)
+     ;; don't backup please. I got this
+     (setq make-backup-files nil)
 
-	  ;; disable recentf
-	  (recentf-mode nil)
+     ;; disable recentf
+     (recentf-mode nil)
 
-	  ;; activate column-number-mode
-	  (column-number-mode t)
-	  (setq-default indicate-buffer-boundaries 'right)
+     ;; activate column-number-mode
+     (column-number-mode t)
+     (setq-default indicate-buffer-boundaries 'right)
 
-	  ;; delete marked region with 'DEL' key or backspace
-	  (delete-selection-mode t)
+     ;; delete marked region with 'DEL' key or backspace
+     (delete-selection-mode t)
 
-	  ;; define abbrev file
-	  (setq abbrev-file-name (expand-file-name "abbrev.el" user-emacs-directory))
-	  (unless (file-exists-p abbrev-file-name)
-	    (write-region "" "" abbrev-file-name))
+     ;; define abbrev file
+     (setq abbrev-file-name (expand-file-name "abbrev.el" user-emacs-directory))
+     (unless (file-exists-p abbrev-file-name)
+       (write-region "" "" abbrev-file-name))
 
-	  ;; supress some warning
-	  (setq ad-redefinition-action 'accept)
+     ;; supress some warning
+     (setq ad-redefinition-action 'accept)
    #+end_src
 * CURSOR STYLING
 #+begin_src emacs-lisp
@@ -176,6 +176,76 @@
     (beacon-mode t)
     (setq beacon-color "#0057FF"))
 #+end_src
+* WHICH-KEY
+  #+begin_src emacs-lisp
+    (use-package which-key
+      :ensure t
+      :custom
+      (which-key-separator " ")
+      (which-key-prefix-prefix "+")
+      :config (which-key-mode t))
+  #+end_src
+* COUNSEL
+  #+begin_src emacs-lisp
+    (use-package amx :ensure t)
+    (use-package flx :ensure t)
+
+    (use-package counsel
+      :ensure t
+      :config
+      (ivy-mode t)
+      (setq ivy-use-virtual-buffers t
+	    ivy-initial-inputs-alist nil
+	    enable-recursive-minibuffers t
+	    search-default-mode #'char-fold-to-regexp
+	    ivy-re-builders-alist
+	    '((ivy-switch-buffer . ivy--regex-plus)
+	      (t . ivy--regex-fuzzy)))
+      :bind (("C-s" . counsel-grep-or-swiper)
+	     ("M-x" . counsel-M-x)
+	     ("C-x C-m" . counsel-M-x)
+	     ("C-x C-f" . counsel-find-file)))
+
+    (use-package avy-flycheck
+      :ensure t
+      :config
+      (global-set-key (kbd "C-'") #'avy-flycheck-goto-error))
+
+    (use-package all-the-icons-ivy
+      :ensure t
+      :config (all-the-icons-ivy-setup))
+  #+end_src
+* ORG
+  #+begin_src emacs-lisp
+    (use-package org
+     :ensure org-plus-contrib
+     :config (setq
+	      org-src-fontify-natively t
+	      org-src-tab-acts-natively t
+	      org-todo-keywords '((sequence "BACKLOG(b)" "TODO(t)" "DOING(n)" "|" "DONE(d)")
+				  (sequence "|"  "ONHOLD(h)" "CANCELED(c)"))
+	      org-agenda-files '("~/.org/agenda.org")))
+
+
+    (use-package restclient
+      :ensure t
+      :config (add-hook 'restclient-mode-hook 'company-restclient))
+
+    (use-package company-restclient
+      :ensure t
+      :config
+      (progn
+	(add-hook 'restclient-mode-hook
+		  (lambda ()
+		    (set (make-local-variable 'company-backends)'(company-restclient))
+		    (company-mode t)))))
+
+    (use-package ob-restclient
+      :ensure t
+      :config 
+      (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
+
+  #+end_src
 * ANSI-XTERM
   #+begin_src emacs-lisp
     ;; (use-package xterm-color
@@ -226,53 +296,6 @@
       (advice-add 'compilation-filter :around #'my-advice-compilation-filter)
       (advice-add 'gud-filter :around #'my-advice-compilation-filter))
   #+end_src
-* FLYCHECK
-  #+begin_src emacs-lisp
-    (use-package flycheck
-      :ensure t
-      :hook ((prog-mode . flycheck-mode))
-      :config
-      (setq flycheck-highlighting-mode 'lines))
-  #+end_src
-* WHICH-KEY
-  #+begin_src emacs-lisp
-    (use-package which-key
-      :ensure t
-      :custom
-      (which-key-separator " ")
-      (which-key-prefix-prefix "+")
-      :config (which-key-mode t))
-  #+end_src
-* COUNSEL
-  #+begin_src emacs-lisp
-    (use-package amx :ensure t)
-    (use-package flx :ensure t)
-
-    (use-package counsel
-      :ensure t
-      :config
-      (ivy-mode t)
-      (setq ivy-use-virtual-buffers t
-	    ivy-initial-inputs-alist nil
-	    enable-recursive-minibuffers t
-	    search-default-mode #'char-fold-to-regexp
-	    ivy-re-builders-alist
-	    '((ivy-switch-buffer . ivy--regex-plus)
-	      (t . ivy--regex-fuzzy)))
-      :bind (("C-s" . counsel-grep-or-swiper)
-	     ("M-x" . counsel-M-x)
-	     ("C-x C-m" . counsel-M-x)
-	     ("C-x C-f" . counsel-find-file)))
-
-    (use-package avy-flycheck
-      :ensure t
-      :config
-      (global-set-key (kbd "C-'") #'avy-flycheck-goto-error))
-
-    (use-package all-the-icons-ivy
-      :ensure t
-      :config (all-the-icons-ivy-setup))
-  #+end_src
 * PROJECTILE
   #+begin_src emacs-lisp
     (use-package projectile
@@ -284,32 +307,6 @@
       :config
       (counsel-projectile-mode)
       (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
-  #+end_src
-* COMPANY
-  #+begin_src emacs-lisp
-    (use-package company
-      :ensure t
-      :config
-      (global-company-mode t)
-      (setq company-tooltip-limit 10
-	    company-dabbrev-downcase 0
-	    company-idle-delay 0
-	    company-echo-delay 0
-	    company-minimum-prefix-length 1
-	    company-require-match nil
-	    company-selection-wrap-around t
-	    company-tooltip-align-annotations t
-	    company-global-modes '(not eshell-mode))
-      (define-key company-active-map (kbd "M-n") nil)
-      (define-key company-active-map (kbd "M-p") nil)
-      (define-key company-active-map (kbd "C-n") 'company-select-next)
-      (define-key company-active-map (kbd "C-p") 'company-select-previous)
-      (define-key company-active-map (kbd "TAB") 'company-complete)
-      (define-key company-active-map (kbd "<tab>") 'company-complete))
-
-    (use-package company-flx
-      :ensure t
-      :config (company-flx-mode t))
   #+end_src
 * ESHELL
   #+begin_src emacs-lisp
@@ -367,7 +364,7 @@
 
     (defun fill-window-with-char ()
       "Fill the window width with one character acting as a line."
-      (make-string (window-body-width) ?_))
+      (make-string (window-body-width) ? ))
 
     (defun pwd-shorten-dirs (pwd)
       "Shorten all directory names in PWD except the last two."
@@ -383,7 +380,7 @@
 	  (lambda nil
 	    (concat
 	     (propertize "\n" 'face nil)
-	     (propertize "\n" 'face '(:background "#181F25"))
+	     (propertize (fill-window-with-char) 'face '(:background "#181F25"))
 	     (propertize "╭⟢" 'face '(:foreground "#A2DEB2"))
 	     (propertize " " 'face nil)
 	     (propertize (user-login-name) 'face '(:foreground "#5DC078"))
@@ -404,36 +401,31 @@
     ;; Set this to match eshell-prompt-function
     (setq eshell-prompt-regexp "^╰🡢 ")
   #+end_src
-* ORG
+* FLYCHECK
   #+begin_src emacs-lisp
-    (use-package org
-     :ensure org-plus-contrib
-     :config (setq
-	      org-src-fontify-natively t
-	      org-src-tab-acts-natively t
-	      org-todo-keywords '((sequence "BACKLOG(b)" "TODO(t)" "DOING(n)" "|" "DONE(d)")
-				  (sequence "|"  "ONHOLD(h)" "CANCELED(c)"))
-	      org-agenda-files '("~/.org/agenda.org")))
-
-
-    (use-package restclient
+    (use-package flycheck
       :ensure t
-      :config (add-hook 'restclient-mode-hook 'company-restclient))
-
-    (use-package company-restclient
+      :hook ((prog-mode . flycheck-mode))
+      :config
+      (setq flycheck-highlighting-mode 'lines))
+  #+end_src
+* COMPANY
+  #+begin_src emacs-lisp
+    (use-package company
       :ensure t
       :config
-      (progn
-	(add-hook 'restclient-mode-hook
-		  (lambda ()
-		    (set (make-local-variable 'company-backends)'(company-restclient))
-		    (company-mode t)))))
+      (global-company-mode t)
+      (setq company-global-modes '(not eshell-mode))
+      (define-key company-active-map (kbd "M-n") nil)
+      (define-key company-active-map (kbd "M-p") nil)
+      (define-key company-active-map (kbd "C-n") 'company-select-next)
+      (define-key company-active-map (kbd "C-p") 'company-select-previous)
+      (define-key company-active-map (kbd "TAB") 'company-complete)
+      (define-key company-active-map (kbd "<tab>") 'company-complete))
 
-    (use-package ob-restclient
+    (use-package company-flx
       :ensure t
-      :config 
-      (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
-
+      :config (company-flx-mode t))
   #+end_src
 * LSP
   #+begin_src emacs-lisp
@@ -456,7 +448,7 @@
       (setq lsp-prefer-flymake nil
 	    lsp-dart-sdk-dir (get-dart-path)
 	    lsp-enable-on-type-formatting nil
-	    lsp-log-max 1000))
+	    lsp-log-max 10000))
 
     (use-package lsp-ui
       :ensure t
@@ -470,11 +462,7 @@
       :ensure t
       :requires company
       :config
-      (push 'company-lsp company-backends)
-      (setq company-transformers nil
-	    company-lsp-async t
-	    company-lsp-cache-candidates 'auto
-	    company-lsp-filter-candidates t))
+      (push 'company-lsp company-backends))
 
     (use-package yasnippet
       :ensure t
@@ -566,6 +554,7 @@
      (use-package flutter
        :ensure t
        :after dart-mode
+       ;; :custom (flutter-sdk-path "/Applications/flutter/")
        :bind (:map dart-mode-map ("C-x C-s" . #'flutter-lsp-save)))
    #+end_src
 ** LUA
