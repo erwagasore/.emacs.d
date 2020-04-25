@@ -36,7 +36,7 @@
     (prefer-coding-system 'utf-8)
 
     ;; define the font family and size
-    (set-frame-font "PragmataPro-13" nil t)
+    (set-frame-font "PragmataPro Liga-13" nil t)
     (setq prettify-symbols-unprettify-at-point 'right-edge)
 
     ;; Load pragmatapro-lig.el
@@ -44,13 +44,13 @@
     (require 'pragmatapro-lig)
     (pragmatapro-lig-global-mode)
 
-    (global-prettify-symbols-mode +1)
+    (global-prettify-symbols-mode t)
   #+end_src
 * FRAME POSITIONING
   #+begin_src emacs-lisp
     (defun set-initial-frame ()
       "Defines and center the frame window"
-      (let* ((base-factor 0.72)
+      (let* ((base-factor 0.54)
 	     (a-width (* (display-pixel-width) base-factor))
 	     (a-height (* (display-pixel-height) base-factor))
 	     (a-left (truncate (/ (- (display-pixel-width) a-width) 2)))
@@ -364,7 +364,7 @@
 
     (defun fill-window-with-char ()
       "Fill the window width with one character acting as a line."
-      (make-string (window-body-width) ? ))
+      (concat (make-string (- (window-body-width) 1) ? ) "\n"))
 
     (defun pwd-shorten-dirs (pwd)
       "Shorten all directory names in PWD except the last two."
@@ -380,7 +380,7 @@
 	  (lambda nil
 	    (concat
 	     (propertize "\n" 'face nil)
-	     (propertize (fill-window-with-char) 'face '(:background "#181F25"))
+	     (propertize "\n" 'face '(:background "#191919"))
 	     (propertize "╭⟢" 'face '(:foreground "#A2DEB2"))
 	     (propertize " " 'face nil)
 	     (propertize (user-login-name) 'face '(:foreground "#5DC078"))
