@@ -36,7 +36,7 @@
     (prefer-coding-system 'utf-8)
 
     ;; define the font family and size
-    (set-frame-font "PragmataPro Liga-13" nil t)
+    (set-frame-font "PragmataPro Liga-14" nil t)
     (setq prettify-symbols-unprettify-at-point 'right-edge)
 
     ;; Load pragmatapro-lig.el
@@ -190,30 +190,57 @@
     (use-package amx :ensure t)
     (use-package flx :ensure t)
 
+    (use-package ivy
+      :ensure t
+      :diminish (ivy-mode . "")
+      :init (ivy-mode 1) ; globally at startup
+      :config
+      (setq ivy-use-virtual-buffers t)
+      (setq ivy-height 20)
+      (setq ivy-count-format "%d/%d "))
+
     (use-package counsel
       :ensure t
-      :config
-      (ivy-mode t)
-      (setq ivy-use-virtual-buffers t
-	    ivy-initial-inputs-alist nil
-	    enable-recursive-minibuffers t
-	    search-default-mode #'char-fold-to-regexp
-	    ivy-re-builders-alist
-	    '((ivy-switch-buffer . ivy--regex-plus)
-	      (t . ivy--regex-fuzzy)))
-      :bind (("C-s" . counsel-grep-or-swiper)
-	     ("M-x" . counsel-M-x)
-	     ("C-x C-m" . counsel-M-x)
-	     ("C-x C-f" . counsel-find-file)))
+      :bind* ; load when pressed
+      (("M-x"     . counsel-M-x)
+       ("C-s"     . swiper)
+       ("C-x C-f" . counsel-find-file)
+       ("C-x C-r" . counsel-recentf)  ; search for recently edited
+       ("C-c g"   . counsel-git)      ; search for files in git repo
+       ("C-c j"   . counsel-git-grep) ; search for regexp in git repo
+       ("C-c /"   . counsel-ag)       ; Use ag for regexp
+       ("C-x l"   . counsel-locate)
+       ("C-x C-f" . counsel-find-file)
+       ("<f1> f"  . counsel-describe-function)
+       ("<f1> v"  . counsel-describe-variable)
+       ("<f1> l"  . counsel-find-library)
+       ("<f2> i"  . counsel-info-lookup-symbol)
+       ("<f2> u"  . counsel-unicode-char)
+       ("C-c C-r" . ivy-resume)))     ; Resume last Ivy-based completion
 
-    (use-package avy-flycheck
-      :ensure t
-      :config
-      (global-set-key (kbd "C-'") #'avy-flycheck-goto-error))
+	;; 	ivy-initial-inputs-alist nil
+	;; 	ivy-display-style 'fancy
+	;; 	enable-recursive-minibuffers t
+	;; 	search-default-mode #'char-fold-to-regexp
+	;; 	ivy-re-builders-alist
+	;; 	'((ivy-switch-buffer . ivy--regex-plus)
+	;; 	  (t . ivy--regex-fuzzy)))
+	;;   :bind (("C-s" . swiper)
+	;; 	 ("C-r" . swiper)
+	;; 	 ("C-c C-r" . ivy-resume)
+	;; 	 ("M-x" . counsel-M-x)
+	;; 	 ("C-x C-m" . counsel-M-x)
+	;; 	 ("C-x C-f" . counsel-find-file)))
 
-    (use-package all-the-icons-ivy
-      :ensure t
-      :config (all-the-icons-ivy-setup))
+	;; (use-package avy-flycheck
+	;;   :ensure t
+	;;   :config
+	;;   (global-set-key (kbd
+	;; 		   "C-'") #'avy-flycheck-goto-error))
+
+     (use-package all-the-icons-ivy
+       :ensure t
+       :config (all-the-icons-ivy-setup))
   #+end_src
 * ORG
   #+begin_src emacs-lisp
@@ -613,6 +640,15 @@
      (use-package prettier-js
        :ensure t
        :init (add-hook 'js2-mode-hook 'prettier-js-mode))
+
+     (use-package skewer-mode
+       :bind (("C-c K" . run-skewer))
+       :diminish skewer-mode
+       :ensure t
+       :init
+       (add-hook 'js2-mode-hook 'skewer-mode)
+       (add-hook 'css-mode-hook 'skewer-css-mode)
+       (add-hook 'html-mode-hook 'skewer-html-mode))
    #+end_src
 * CLI CLIENTS
 ** GIT
@@ -620,6 +656,7 @@
      (use-package magit
        :ensure t
        :init (magit-auto-revert-mode -1)
+       :config (setq magit-completing-read-function 'ivy-completing-read)
        :bind ("C-x g" . magit-status))
 
      (if (display-graphic-p)
