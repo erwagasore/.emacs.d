@@ -659,6 +659,9 @@
        :config (setq magit-completing-read-function 'ivy-completing-read)
        :bind ("C-x g" . magit-status))
 
+     (use-package forge
+       :ensure t)
+
      (if (display-graphic-p)
 	 (use-package git-gutter-fringe
 	   :ensure t
