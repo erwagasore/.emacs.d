@@ -193,22 +193,28 @@
     (use-package ivy
       :ensure t
       :diminish (ivy-mode . "")
-      :init (ivy-mode 1) ; globally at startup
+      :init (ivy-mode t) ; globally at startup
       :config
-      (setq ivy-use-virtual-buffers t)
-      (setq ivy-height 20)
-      (setq ivy-count-format "%d/%d "))
+      (setq ivy-use-virtual-buffers t
+	    ivy-initial-inputs-alist nil
+	    ivy-display-style 'fancy
+	    ivy-re-builders-alist
+	    '((ivy-switch-buffer . ivy--regex-plus)
+	      (t . ivy--regex-fuzzy))
+	    ivy-count-format "%d/%d "))
 
     (use-package counsel
       :ensure t
       :bind* ; load when pressed
-      (("M-x"     . counsel-M-x)
+      (("C-x C-m" . counsel-M-x)
+       ("M-x"     . counsel-M-x)
        ("C-s"     . swiper)
+       ("C-r"     . swiper)
        ("C-x C-f" . counsel-find-file)
-       ("C-x C-r" . counsel-recentf)  ; search for recently edited
-       ("C-c g"   . counsel-git)      ; search for files in git repo
-       ("C-c j"   . counsel-git-grep) ; search for regexp in git repo
-       ("C-c /"   . counsel-ag)       ; Use ag for regexp
+       ("C-x C-r" . counsel-recentf)
+       ("C-c g"   . counsel-git)
+       ("C-c j"   . counsel-git-grep)
+       ("C-c /"   . counsel-ag)
        ("C-x l"   . counsel-locate)
        ("C-x C-f" . counsel-find-file)
        ("<f1> f"  . counsel-describe-function)
@@ -216,27 +222,12 @@
        ("<f1> l"  . counsel-find-library)
        ("<f2> i"  . counsel-info-lookup-symbol)
        ("<f2> u"  . counsel-unicode-char)
-       ("C-c C-r" . ivy-resume)))     ; Resume last Ivy-based completion
+       ("C-c C-r" . ivy-resume)))
 
-	;; 	ivy-initial-inputs-alist nil
-	;; 	ivy-display-style 'fancy
-	;; 	enable-recursive-minibuffers t
-	;; 	search-default-mode #'char-fold-to-regexp
-	;; 	ivy-re-builders-alist
-	;; 	'((ivy-switch-buffer . ivy--regex-plus)
-	;; 	  (t . ivy--regex-fuzzy)))
-	;;   :bind (("C-s" . swiper)
-	;; 	 ("C-r" . swiper)
-	;; 	 ("C-c C-r" . ivy-resume)
-	;; 	 ("M-x" . counsel-M-x)
-	;; 	 ("C-x C-m" . counsel-M-x)
-	;; 	 ("C-x C-f" . counsel-find-file)))
-
-	;; (use-package avy-flycheck
-	;;   :ensure t
-	;;   :config
-	;;   (global-set-key (kbd
-	;; 		   "C-'") #'avy-flycheck-goto-error))
+    (use-package avy-flycheck
+      :ensure t
+      :config
+      (global-set-key (kbd "C-'") #'avy-flycheck-goto-error))
 
      (use-package all-the-icons-ivy
        :ensure t
