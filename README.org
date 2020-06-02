@@ -196,12 +196,13 @@
       :init (ivy-mode t) ; globally at startup
       :config
       (setq ivy-use-virtual-buffers t
+	    ivy-count-format "%d/%d "
 	    ivy-initial-inputs-alist nil
 	    ivy-display-style 'fancy
 	    ivy-re-builders-alist
-	    '((ivy-switch-buffer . ivy--regex-plus)
-	      (t . ivy--regex-fuzzy))
-	    ivy-count-format "%d/%d "))
+	    '((ivy-switch-buffer . ivy--regex-fuzzy)
+	      (ivy-switch-buffer-other-window . ivy--regex-fuzzy)
+	      (t . ivy--regex-plus))))
 
     (use-package counsel
       :ensure t
@@ -223,6 +224,9 @@
        ("<f2> i"  . counsel-info-lookup-symbol)
        ("<f2> u"  . counsel-unicode-char)
        ("C-c C-r" . ivy-resume)))
+
+    (use-package counsel-osx-app
+      :ensure t)
 
     (use-package avy-flycheck
       :ensure t
