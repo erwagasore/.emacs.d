@@ -187,30 +187,13 @@
   #+end_src
 * COUNSEL
   #+begin_src emacs-lisp
-    (use-package amx :ensure t)
-    (use-package flx :ensure t)
-
-    (use-package ivy
-      :ensure t
-      :diminish (ivy-mode . "")
-      :init (ivy-mode t) ; globally at startup
-      :config
-      (setq ivy-use-virtual-buffers t
-	    ivy-count-format "%d/%d "
-	    ivy-initial-inputs-alist nil
-	    ivy-display-style 'fancy
-	    ivy-re-builders-alist
-	    '((ivy-switch-buffer . ivy--regex-fuzzy)
-	      (ivy-switch-buffer-other-window . ivy--regex-fuzzy)
-	      (t . ivy--regex-plus))))
-
     (use-package counsel
       :ensure t
       :bind* ; load when pressed
       (("C-x C-m" . counsel-M-x)
        ("M-x"     . counsel-M-x)
-       ("C-s"     . swiper)
-       ("C-r"     . swiper)
+       ("C-s"     . swiper-isearch)
+       ("C-r"     . swiper-isearch)
        ("C-x C-f" . counsel-find-file)
        ("C-x C-r" . counsel-recentf)
        ("C-c g"   . counsel-git)
@@ -228,14 +211,28 @@
     (use-package counsel-osx-app
       :ensure t)
 
+    (use-package amx :ensure t)
+    (use-package flx :ensure t)
+
+    (use-package ivy
+      :ensure t
+      :diminish (ivy-mode . "")
+      :init (ivy-mode t) ; globally at startup
+      :config
+      (setq ivy-count-format "%d/%d "
+	    ivy-display-style 'fancy
+	    ivy-initial-input-alist nil
+	    ivy-re-builders-alist
+	    '((t   . ivy--regex-fuzzy))))
+
     (use-package avy-flycheck
       :ensure t
       :config
       (global-set-key (kbd "C-'") #'avy-flycheck-goto-error))
 
-     (use-package all-the-icons-ivy
-       :ensure t
-       :config (all-the-icons-ivy-setup))
+    (use-package all-the-icons-ivy
+      :ensure t
+      :config (all-the-icons-ivy-setup))
   #+end_src
 * ORG
   #+begin_src emacs-lisp
@@ -655,7 +652,8 @@
        :bind ("C-x g" . magit-status))
 
      (use-package forge
-       :ensure t)
+       :ensure t
+       :after magit)
 
      (if (display-graphic-p)
 	 (use-package git-gutter-fringe
