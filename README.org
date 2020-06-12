@@ -2,8 +2,11 @@
 * BUMP GARBAGE COLLECTION
   #+begin_src emacs-lisp
     ;; Make startup faster by reducing the frequency of garbage
-    ;; collection.  The default is 800 kilobytes.  Measured in bytes.
+    ;; collection.  The default is 800 kilobytes
     (setq gc-cons-threshold (* 96 1024 1024))
+    ;; Increase the amount of data which Emacs reads from the process.
+    ;; The default is 4 kilobytes make it 1 Megabyte
+    (setq read-process-output-max (* 1024 1024))
   #+end_src
 * UI CLEANUP
    #+begin_src emacs-lisp
@@ -36,7 +39,7 @@
     (prefer-coding-system 'utf-8)
 
     ;; define the font family and size
-    (set-frame-font "PragmataPro Liga-14" nil t)
+    (set-frame-font "PragmataPro-14" nil t)
     (setq prettify-symbols-unprettify-at-point 'right-edge)
 
     ;; Load pragmatapro-lig.el
@@ -370,7 +373,7 @@
     (defun git-get-current-branch ()
       "Get git branch in the current directory."
       (when (and (eshell-search-path "git") (locate-dominating-file (eshell/pwd) ".git"))
-	(s-trim (shell-command-to-string (concat "git rev-parse --abbrev-ref HEAD")))))
+	(s-trim (shell-command-to-string (concat "git symbolic-ref --short HEAD --")))))
 
     (defun display-git-prompt-branch ()
       "Displays the git in the prompt."
@@ -399,7 +402,7 @@
 	  (lambda nil
 	    (concat
 	     (propertize "\n" 'face nil)
-	     (propertize "\n" 'face '(:background "#191919"))
+	     ;; (propertize "\n" 'face '(:background "#191919"))
 	     (propertize "╭⟢" 'face '(:foreground "#A2DEB2"))
 	     (propertize " " 'face nil)
 	     (propertize (user-login-name) 'face '(:foreground "#5DC078"))
@@ -430,21 +433,23 @@
   #+end_src
 * COMPANY
   #+begin_src emacs-lisp
-    (use-package company
-      :ensure t
-      :config
-      (global-company-mode t)
-      (setq company-global-modes '(not eshell-mode))
-      (define-key company-active-map (kbd "M-n") nil)
-      (define-key company-active-map (kbd "M-p") nil)
-      (define-key company-active-map (kbd "C-n") 'company-select-next)
-      (define-key company-active-map (kbd "C-p") 'company-select-previous)
-      (define-key company-active-map (kbd "TAB") 'company-complete)
-      (define-key company-active-map (kbd "<tab>") 'company-complete))
+	(use-package company
+	  :ensure t
+	  :config
+	  (global-company-mode t)
+	  (setq company-idle-delay 0.0
+		company-minimum-prefix-length 1
+		company-global-modes '(not eshell-mode))
+	  (define-key company-active-map (kbd "M-n") nil)
+	  (define-key company-active-map (kbd "M-p") nil)
+	  (define-key company-active-map (kbd "C-n") 'company-select-next)
+	  (define-key company-active-map (kbd "C-p") 'company-select-previous)
+	  (define-key company-active-map (kbd "TAB") 'company-complete)
+	  (define-key company-active-map (kbd "<tab>") 'company-complete))
 
-    (use-package company-flx
-      :ensure t
-      :config (company-flx-mode t))
+	(use-package company-flx
+	  :ensure t
+	  :config (company-flx-mode t))
   #+end_src
 * LSP
   #+begin_src emacs-lisp
@@ -462,11 +467,15 @@
 	     (sh-mode . lsp)
 	     (python-mode . lsp)
 	     (dart-mode . lsp)
-	     (js2-mode . lsp))
+	     (js2-mode . lsp)
+	     (typescript-mode . lsp)
+	     (lsp-mode . lsp-enable-which-key-integration))
       :config
       (setq lsp-prefer-flymake nil
 	    lsp-dart-sdk-dir (get-dart-path)
 	    lsp-enable-on-type-formatting nil
+	    lsp-idle-delay 0.500   ;; can improve performance
+	    lsp-prefer-capf t      ;; replacing company-lsp
 	    lsp-log-max 10000))
 
     (use-package lsp-ui
@@ -477,11 +486,13 @@
 	    lsp-ui-sideline-show-symbol nil)
       :hook (lsp-mode . lsp-ui-mode))
 
-    (use-package company-lsp
-      :ensure t
-      :requires company
-      :config
-      (push 'company-lsp company-backends))
+    (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+
+    ;; (use-package company-lsp
+    ;;   :ensure t
+    ;;   :requires company
+    ;;   :config
+    ;;   (push 'company-lsp company-backends))
 
     (use-package yasnippet
       :ensure t
@@ -625,13 +636,19 @@
 
      (use-package js2-mode 
        :ensure t
-       :mode "\\.js\\'"
+       :mode "\\.jsx\\'"
        :config (setq js-indent-level 2)
        :hook (js2-mode . lsp))
 
+     (use-package typescript-mode
+       :ensure t
+       :mode "\\.tsx\\'"
+       :hook (typescript-mode . lsp))
+
      (use-package prettier-js
        :ensure t
-       :init (add-hook 'js2-mode-hook 'prettier-js-mode))
+       :init (add-hook 'js2-mode-hook 'prettier-js-mode)
+	      (add-hook 'typescript-mode-hook 'prettier-js-mode))
 
      (use-package skewer-mode
        :bind (("C-c K" . run-skewer))
