@@ -30,3 +30,4 @@ url/
 /straight/*
 /amx-items
 /mspyls/*
+*.sqlite

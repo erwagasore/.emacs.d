@@ -670,7 +670,16 @@
 
      (use-package forge
        :ensure t
-       :after magit)
+       :after magit
+       :config
+       (add-to-list
+	'forge-alist
+	'("er.github.com" "api.github.com" "github.com"
+	  forge-github-repository))
+       (add-to-list
+	'forge-alist
+	'("er.bitbucket.org" "api.bitbucket.org/2.0" "bitbucket.org"
+	  forge-bitbucket-repository)))
 
      (if (display-graphic-p)
 	 (use-package git-gutter-fringe
