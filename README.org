@@ -1,12 +1,31 @@
 #+PROPERTY: header-args :tangle init.el :comments yes :results silent
-* BUMP GARBAGE COLLECTION
+* OPTIMIZE EMACS STARTUP TIME
   #+begin_src emacs-lisp
     ;; Make startup faster by reducing the frequency of garbage
     ;; collection.  The default is 800 kilobytes
-    (setq gc-cons-threshold (* 96 1024 1024))
+    (setq gc-cons-threshold most-positive-fixnum)
     ;; Increase the amount of data which Emacs reads from the process.
     ;; The default is 4 kilobytes make it 1 Megabyte
     (setq read-process-output-max (* 1024 1024))
+
+
+    (setq file-name-handler-alist nil)
+
+    ;; In Emacs 27+, package initialization occurs before `user-init-file' is
+    ;; loaded, but after `early-init-file'. Doom handles package initialization, so
+    ;; we must prevent Emacs from doing it early!
+    (setq package-enable-at-startup nil)
+    (advice-add #'package--ensure-init-file :override #'ignore)
+
+    ;; Prevent the glimpse of un-styled Emacs by disabling these UI elements early.
+    (push '(menu-bar-lines . 0) default-frame-alist)
+    (push '(tool-bar-lines . 0) default-frame-alist)
+    (push '(vertical-scroll-bars) default-frame-alist)
+
+    ;; Resizing the Emacs frame can be a terribly expensive part of changing the
+    ;; font. By inhibiting this, we easily halve startup times with fonts that are
+    ;; larger than the system default.
+    (setq frame-inhibit-implied-resize t)
   #+end_src
 * UI CLEANUP
    #+begin_src emacs-lisp
@@ -263,11 +282,11 @@
 
 
     (use-package restclient
-      :ensure t
+      :defer t
       :config (add-hook 'restclient-mode-hook 'company-restclient))
 
     (use-package company-restclient
-      :ensure t
+      :defer t
       :config
       (progn
 	(add-hook 'restclient-mode-hook
@@ -276,25 +295,16 @@
 		    (company-mode t)))))
 
     (use-package ob-restclient
-      :ensure t
+      :defer t
       :config 
       (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
 
   #+end_src
 * ANSI-XTERM
   #+begin_src emacs-lisp
-    ;; (use-package xterm-color
-    ;;   :config
-    ;;   (setq comint-output-filter-functions
-    ;; 	(remove 'ansi-color-process-output comint-output-filter-functions))
-
-    ;;   (add-hook 'shell-mode-hook
-    ;; 	    (lambda () (add-hook 'comint-preoutput-filter-functions
-    ;; 				 'xterm-color-filter nil t))))
-
-
     ;; ANSI & XTERM 256 color support
     (use-package xterm-color
+      :defer t
       :defines (compilation-environment
 		eshell-preoutput-filter-functions
 		eshell-output-filter-functions)
@@ -348,14 +358,14 @@
     (setenv "PAGER" "cat")
 
     (use-package shrink-path
-      :ensure t)
+      :defer t)
 
     (use-package esh-autosuggest
-      :ensure t
+      :defer t
       :hook (eshell-mode . esh-autosuggest-mode))
 
     (use-package exec-path-from-shell
-      :ensure t
+      :defer t
       :if (memq window-system '(mac ns))
       :config
       (exec-path-from-shell-initialize)
@@ -367,6 +377,7 @@
       (exec-path-from-shell-copy-env "PERSONAL_ACCESS_TOKEN"))
 
     (use-package eshell
+      :defer t
       :config
       (setq
        eshell-banner-message "...\n"
@@ -380,6 +391,7 @@
        eshell-scroll-to-bottom-on-input 'all))
 
     (use-package eshell-fringe-status
+      :defer t
       :config
       (add-hook 'eshell-mode-hook 'eshell-fringe-status-mode))
 
@@ -439,7 +451,7 @@
 * FLYCHECK
   #+begin_src emacs-lisp
     (use-package flycheck
-      :ensure t
+      :defer t
       :hook ((prog-mode . flycheck-mode))
       :config
       (setq flycheck-highlighting-mode 'lines))
@@ -482,6 +494,9 @@
 	     (dart-mode . lsp)
 	     (js2-mode . lsp)
 	     (typescript-mode . lsp)
+	     (clojure-mode . lsp)
+	     (clojurec-mode . lsp)
+	     (clojurescript-mode . lsp)
 	     (lsp-mode . lsp-enable-which-key-integration))
       :config
       (setq lsp-prefer-flymake nil
@@ -541,28 +556,20 @@
 ** CLOJURE
    #+begin_src emacs-lisp
      (use-package clojure-mode
-       :ensure t
-       :config (yas-global-mode t))
+       :defer t
+       :config
+       (yas-global-mode t)
+       (setq lsp-enable-indentation nil)
+       (add-to-list 'lsp-language-id-configuration '(clojure-mode . "clojure-mode"))
+       (add-to-list 'lsp-language-id-configuration '(clojurescript-mode . "clojure-mode")))
 
      (use-package flycheck-joker
-       :ensure t)
-
-     (use-package lsp-mode
-       :ensure t
-       :commands lsp
-       :config
-       (add-to-list 'lsp-language-id-configuration '(clojure-mode . "clojure-mode"))
-       (add-to-list 'lsp-language-id-configuration '(clojurescript-mode . "clojure-mode"))
-       :init
-       (setq lsp-enable-indentation nil)
-       (add-hook 'clojure-mode-hook #'lsp)
-       (add-hook 'clojurec-mode-hook #'lsp)
-       (add-hook 'clojurescript-mode-hook #'lsp))
+       :defer t)
    #+end_src
 ** PYTHON
    #+begin_src emacs-lisp
      (use-package lsp-python-ms
-       :ensure t
+       :defer t
        :config
        (add-to-list 'lsp-language-id-configuration '(python-mode . "python"))
        :hook (python-mode . (lambda () (require 'lsp-python-ms) (lsp))))
@@ -587,7 +594,7 @@
 
 
      (use-package dart-mode
-       :ensure t
+       :defer t
        :config
        (add-to-list 'lsp-language-id-configuration '(dart-mode . "dart"))
        (with-eval-after-load "projectile"
@@ -595,7 +602,7 @@
 	 (add-to-list 'projectile-project-root-files-bottom-up "build")))
 
      (use-package flutter
-       :ensure t
+       :defer t
        :after dart-mode
        ;; :custom (flutter-sdk-path "/Applications/flutter/")
        :bind (:map dart-mode-map ("C-x C-s" . #'flutter-lsp-save)))
@@ -603,32 +610,32 @@
 ** LUA
    #+begin_src emacs-lisp
      (use-package lua-mode
-       :ensure t)
+       :defer t)
    #+end_src
 ** GROOVY
    #+begin_src emacs-lisp
   (use-package groovy-mode
-    :ensure t
+    :defer t
     :mode "\\.groovy\\'\\|\\.gradle\\'")
    #+end_src
 
 ** RUST
    #+begin_src emacs-lisp
      (use-package toml-mode
-       :ensure t)
+       :defer t)
 
      (use-package rust-mode
-       :ensure t
+       :defer t
        :init
        (setq rust-format-on-save t)
        :hook (rust-mode . lsp))
 
      (use-package cargo
-       :ensure t
+       :defer t
        :hook (rust-mode . cargo-minor-mode))
 
      (use-package flycheck-rust
-       :ensure t
+       :defer t
        :after (rust-mode)
        :hook ((rust-mode . flycheck-rust-setup)
 	      (flycheck-mode . flycheck-rust-setup)))
@@ -636,38 +643,38 @@
 ** JAVASCRIPT
    #+begin_src emacs-lisp
      (use-package json-mode
-       :ensure t
+       :defer t
        :mode (("\\.json\\'" . json-mode)
 	      ("\\.tmpl\\'" . json-mode)
 	      ("\\.eslintrc\\'" . json-mode))
        :config (setq-default js-indent-level 2))
 
      (use-package json-reformat
-       :ensure t
+       :defer t
        :after json-mode
        :bind (("C-c r" . json-reformat-region)))
 
      (use-package js2-mode 
-       :ensure t
+       :defer t
        :mode "\\.jsx?\\'"
        :config (setq js-indent-level 2)
        :hook (js2-mode . lsp))
 
      (use-package typescript-mode
-       :ensure t
+       :defer t
        :mode "\\.tsx?\\'"
        :config (setq typescript-indent-level 2)
        :hook (typescript-mode . lsp))
 
      (use-package prettier-js
-       :ensure t
+       :defer t
        :init (add-hook 'js2-mode-hook 'prettier-js-mode)
 	      (add-hook 'typescript-mode-hook 'prettier-js-mode))
 
      (use-package skewer-mode
        :bind (("C-c K" . run-skewer))
        :diminish skewer-mode
-       :ensure t
+       :defer t
        :init
        (add-hook 'js2-mode-hook 'skewer-mode)
        (add-hook 'css-mode-hook 'skewer-css-mode)
@@ -677,13 +684,13 @@
 ** GIT
    #+begin_src emacs-lisp
      (use-package magit
-       :ensure t
+       :defer t
        :init (magit-auto-revert-mode -1)
        :config (setq magit-completing-read-function 'ivy-completing-read)
        :bind ("C-x g" . magit-status))
 
      (use-package forge
-       :ensure t
+       :defer t
        :after magit
        :config
        (add-to-list
@@ -697,17 +704,17 @@
 
      (if (display-graphic-p)
 	 (use-package git-gutter-fringe
-	   :ensure t
+	   :defer t
 	   :init (global-git-gutter-mode))
        (use-package git-gutter
-	 :ensure t
+	 :defer t
 	 :init (global-git-gutter-mode)))
 #+end_src
 ** DOCKER
 #+begin_src emacs-lisp
-  (use-package dockerfile-mode :ensure t)
-  (use-package docker-compose-mode :ensure t)
-  (use-package docker-tramp :ensure t)
+  (use-package dockerfile-mode :defer t)
+  (use-package docker-compose-mode :defer t)
+  (use-package docker-tramp :defer t)
 #+end_src
 
 * CUSTOM.EL CONFIG FILE
