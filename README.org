@@ -136,6 +136,20 @@
       (package-refresh-contents)
       (package-install 'use-package))
   #+end_src
+* EXEC PATH
+  #+begin_src emacs-lisp
+    (use-package exec-path-from-shell
+	  :ensure t
+	  :if (memq window-system '(mac ns))
+	  :config
+	  (exec-path-from-shell-initialize)
+	  (exec-path-from-shell-copy-env "LANG")
+	  (exec-path-from-shell-copy-env "LC_CTYPE")
+	  (exec-path-from-shell-copy-env "LC_NUMERIC")
+	  (exec-path-from-shell-copy-env "LC_ALL")
+	  (exec-path-from-shell-copy-env "HOME")
+	  (exec-path-from-shell-copy-env "PERSONAL_ACCESS_TOKEN"))
+  #+end_src
 * THEMING
   #+begin_src emacs-lisp
     (use-package doom-themes
@@ -161,6 +175,9 @@
   #+end_src
 * OTHER DEFAULTS
    #+begin_src emacs-lisp
+     ;; better error details
+     ;; (setq debug-on-error t)
+
      ;; default directory for dire-mode
      (setq default-directory "~/")
 
@@ -364,18 +381,6 @@
       :defer t
       :hook (eshell-mode . esh-autosuggest-mode))
 
-    (use-package exec-path-from-shell
-      :defer t
-      :if (memq window-system '(mac ns))
-      :config
-      (exec-path-from-shell-initialize)
-      (exec-path-from-shell-copy-env "LANG")
-      (exec-path-from-shell-copy-env "LC_CTYPE")
-      (exec-path-from-shell-copy-env "LC_NUMERIC")
-      (exec-path-from-shell-copy-env "LC_ALL")
-      (exec-path-from-shell-copy-env "HOME")
-      (exec-path-from-shell-copy-env "PERSONAL_ACCESS_TOKEN"))
-
     (use-package eshell
       :defer t
       :config
@@ -459,7 +464,7 @@
 * COMPANY
   #+begin_src emacs-lisp
 	(use-package company
-	  :ensure t
+	  :defer t
 	  :config
 	  (global-company-mode t)
 	  (setq company-idle-delay 0.0
@@ -473,75 +478,22 @@
 	  (define-key company-active-map (kbd "<tab>") 'company-complete))
 
 	(use-package company-flx
-	  :ensure t
+	  :defer t
 	  :config (company-flx-mode t))
-  #+end_src
-* LSP
-  #+begin_src emacs-lisp
-    (defun get-dart-path ()
-      (string-trim-right
-       (car
-	(seq-filter
-	 (lambda (str) (string-match "dart" str))
-	 (split-string (getenv "PATH") ":")))
-       "/bin"))
-
-    (use-package lsp-mode
-      :ensure t
-      :hook (
-	     (sh-mode . lsp)
-	     (python-mode . lsp)
-	     (dart-mode . lsp)
-	     (js2-mode . lsp)
-	     (typescript-mode . lsp)
-	     (clojure-mode . lsp)
-	     (clojurec-mode . lsp)
-	     (clojurescript-mode . lsp)
-	     (lsp-mode . lsp-enable-which-key-integration))
-      :config
-      (setq lsp-prefer-flymake nil
-	    lsp-dart-sdk-dir (get-dart-path)
-	    lsp-enable-on-type-formatting nil
-	    lsp-idle-delay 0.500   ;; can improve performance
-	    lsp-prefer-capf t      ;; replacing company-lsp
-	    lsp-log-max 10000))
-
-    (use-package lsp-ui
-      :ensure t
-      :requires lsp-mode flycheck
-      :config
-      (setq lsp-ui-sideline-enable t
-	    lsp-ui-sideline-show-symbol nil)
-      :hook (lsp-mode . lsp-ui-mode))
-
-    (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
-
-    ;; (use-package company-lsp
-    ;;   :ensure t
-    ;;   :requires company
-    ;;   :config
-    ;;   (push 'company-lsp company-backends))
-
-    (use-package yasnippet
-      :ensure t
-      :diminish yas-minor-mode
-      :config
-      (use-package yasnippet-snippets :ensure t)
-      (yas-global-mode t))
   #+end_src
 * LANGUAGE UTILS
   #+begin_src emacs-lisp
     (use-package smartparens
-      :ensure t
+      :defer t
       :config (progn (show-smartparens-global-mode t))
       :hook (prog-mode . turn-on-smartparens-mode))
 
     (use-package rainbow-delimiters
-      :ensure t
+      :defer t
       :hook (prog-mode . rainbow-delimiters-mode))
 
     (use-package highlight-indent-guides
-      :ensure t
+      :defer t
       :hook (prog-mode . highlight-indent-guides-mode)
       :custom
       (highlight-indent-guides-character ?\│)
@@ -553,19 +505,6 @@
       (highlight-indent-guides-delay 0))
   #+end_src
 * LANGUAGES
-** CLOJURE
-   #+begin_src emacs-lisp
-     (use-package clojure-mode
-       :defer t
-       :config
-       (yas-global-mode t)
-       (setq lsp-enable-indentation nil)
-       (add-to-list 'lsp-language-id-configuration '(clojure-mode . "clojure-mode"))
-       (add-to-list 'lsp-language-id-configuration '(clojurescript-mode . "clojure-mode")))
-
-     (use-package flycheck-joker
-       :defer t)
-   #+end_src
 ** PYTHON
    #+begin_src emacs-lisp
      (use-package lsp-python-ms
@@ -672,14 +611,59 @@
 	      (add-hook 'typescript-mode-hook 'prettier-js-mode))
 
      (use-package skewer-mode
+       :defer t
        :bind (("C-c K" . run-skewer))
        :diminish skewer-mode
-       :defer t
        :init
        (add-hook 'js2-mode-hook 'skewer-mode)
        (add-hook 'css-mode-hook 'skewer-css-mode)
        (add-hook 'html-mode-hook 'skewer-html-mode))
    #+end_src
+* LSP
+  #+begin_src emacs-lisp
+    (defun get-dart-path ()
+      (string-trim-right
+       (car
+	(seq-filter
+	 (lambda (str) (string-match "dart" str))
+	 (split-string (getenv "PATH") ":")))
+       "/bin"))
+
+    (use-package lsp-mode
+      :ensure t
+      :config
+      (setq lsp-prefer-flymake nil
+	    lsp-dart-sdk-dir (get-dart-path)
+	    lsp-enable-on-type-formatting nil
+	    lsp-idle-delay 0.500   ;; can improve performance
+	    lsp-prefer-capf t      ;; replacing company-lsp
+	    lsp-log-max 10000)
+      :hook 
+      (sh-mode . lsp-deferred)
+      (python-mode . lsp-deferred)
+      (dart-mode . lsp-deferred)
+      (js2-mode . lsp-deferred)
+      (typescript-mode . lsp-deferred)
+      (lsp-mode . lsp-enable-which-key-integration)
+      :commands (lsp lsp-deferred))
+
+    (use-package lsp-ui
+      :ensure t
+      :requires lsp-mode flycheck
+      :config
+      (setq lsp-ui-sideline-enable t
+	    lsp-ui-sideline-show-symbol nil)
+      :hook (lsp-mode . lsp-ui-mode))
+
+    (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+
+    (use-package yasnippet
+      :ensure t
+      :diminish yas-minor-mode
+      :config
+      (use-package yasnippet-snippets :ensure t)
+      (yas-global-mode t))
+  #+end_src
 * CLI CLIENTS
 ** GIT
    #+begin_src emacs-lisp
