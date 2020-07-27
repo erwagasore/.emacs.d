@@ -58,7 +58,7 @@
     (prefer-coding-system 'utf-8)
 
     ;; define the font family and size
-    (set-frame-font "PragmataPro-14" nil t)
+    (set-frame-font "PragmataPro-15" nil t)
     (setq prettify-symbols-unprettify-at-point 'right-edge)
 
     ;; Load pragmatapro-lig.el
@@ -142,13 +142,15 @@
 	  :ensure t
 	  :if (memq window-system '(mac ns))
 	  :config
-	  (exec-path-from-shell-initialize)
-	  (exec-path-from-shell-copy-env "LANG")
-	  (exec-path-from-shell-copy-env "LC_CTYPE")
-	  (exec-path-from-shell-copy-env "LC_NUMERIC")
-	  (exec-path-from-shell-copy-env "LC_ALL")
-	  (exec-path-from-shell-copy-env "HOME")
-	  (exec-path-from-shell-copy-env "PERSONAL_ACCESS_TOKEN"))
+	  (setq exec-path-from-shell-variables
+		'("LANG" "LC_CTYPE" "LC_NUMERIC" "LC_ALL" "HOME" "PERSONAL_ACCESS_TOKEN"
+		  "FLASK_APP" "FLASK_ENV" "SECRET_KEY" "FLASK_MODE" "SERVER_MODE"
+		  "POSTGRES_DB" "POSTGRES_DB_TEST" "POSTGRES_USER" "POSTGRES_PASSWORD"
+		  "POSTGRES_PORT" "POSTGRES_HOST" "POSTGRES_TEST_HOST"
+		  "MAIL_USERNAME" "MAIL_PASSWORD" "SECURITY_PASSWORD_SALT"
+		  "TELCO_63510_SMS_SEND_PASSWORD" "TELCO_63514_SMS_SEND_PASSWORD"
+		  "TELCO_63513_SMS_SEND_PASSWORD" "SENDGRID_API_KEY"))
+	  (exec-path-from-shell-initialize))
   #+end_src
 * THEMING
   #+begin_src emacs-lisp
@@ -166,11 +168,11 @@
       :hook (after-init . doom-modeline-mode))
 
     (use-package winum
-      :ensure t
+      :defer t
       :config (winum-mode))
 
     (use-package all-the-icons
-      :ensure t
+      :defer t
       :config (setq inhibit-compacting-font-caches t))
   #+end_src
 * OTHER DEFAULTS
@@ -210,7 +212,7 @@
 
   ;; flashes the cursor's line switched buffer
   (use-package beacon
-    :ensure t
+    :defer t
     :config
     (beacon-mode t)
     (setq beacon-color "#0057FF"))
