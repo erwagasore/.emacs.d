@@ -58,7 +58,7 @@
     (prefer-coding-system 'utf-8)
 
     ;; define the font family and size
-    (set-frame-font "PragmataPro-15" t t)
+    (add-to-list 'default-frame-alist '(font . "PragmataPro-15"))
 
     ;; Load pragmatapro-lig.el
     (add-to-list 'load-path "~/.emacs.d/files")
@@ -190,6 +190,9 @@
 
      ;; don't backup please. I got this
      (setq make-backup-files nil)
+
+     ;; disable emacs lockfiles
+     (setq create-lockfiles nil)
 
      ;; disable recentf
      (recentf-mode nil)
