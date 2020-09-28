@@ -173,11 +173,11 @@
       :hook (after-init . doom-modeline-mode))
 
     (use-package winum
-      :defer t
+      :ensure t
       :config (winum-mode))
 
     (use-package all-the-icons
-      :defer t
+      :ensure t
       :config (setq inhibit-compacting-font-caches t))
   #+end_src
 * OTHER DEFAULTS
@@ -214,7 +214,7 @@
 
      ;; add char-menu
      (use-package char-menu
-       :defer t
+       :ensure t
        :bind ("M-p" . char-menu)
        :custom
        (char-menu '("—" "‘’" "“”" "…" "«»" "–"
@@ -260,7 +260,7 @@
 
   ;; flashes the cursor's line switched buffer
   (use-package beacon
-    :defer t
+    :ensure t
     :config
     (beacon-mode t)
     (setq beacon-color "#0057FF"))
@@ -349,11 +349,11 @@
 
 
     (use-package restclient
-      :defer t
+      :ensure t
       :config (add-hook 'restclient-mode-hook 'company-restclient))
 
     (use-package company-restclient
-      :defer t
+      :ensure t
       :config
       (progn
 	(add-hook 'restclient-mode-hook
@@ -362,7 +362,7 @@
 		    (company-mode t)))))
 
     (use-package ob-restclient
-      :defer t
+      :ensure t
       :config 
       (org-babel-do-load-languages 'org-babel-load-languages '((restclient . t))))
 
@@ -371,7 +371,7 @@
   #+begin_src emacs-lisp
     ;; ANSI & XTERM 256 color support
     (use-package xterm-color
-      :defer t
+      :ensure t
       :defines (compilation-environment
 		eshell-preoutput-filter-functions
 		eshell-output-filter-functions)
@@ -425,14 +425,14 @@
     (setenv "PAGER" "cat")
 
     (use-package shrink-path
-      :defer t)
+      :ensure t)
 
     (use-package esh-autosuggest
-      :defer t
+      :ensure t
       :hook (eshell-mode . esh-autosuggest-mode))
 
     (use-package eshell
-      :defer t
+      :ensure t
       :config
       (setq
        eshell-banner-message "...\n"
@@ -446,7 +446,7 @@
        eshell-scroll-to-bottom-on-input 'all))
 
     (use-package eshell-fringe-status
-      :defer t
+      :ensure t
       :config
       (add-hook 'eshell-mode-hook 'eshell-fringe-status-mode))
 
@@ -506,7 +506,7 @@
 * FLYCHECK
   #+begin_src emacs-lisp
     (use-package flycheck
-      :defer t
+      :ensure t
       :hook ((prog-mode . flycheck-mode))
       :config
       (setq flycheck-highlighting-mode 'lines))
@@ -514,7 +514,7 @@
 * COMPANY
   #+begin_src emacs-lisp
 	(use-package company
-	  :defer t
+	  :ensure t
 	  :config
 	  (global-company-mode t)
 	  (setq company-idle-delay 0.0
@@ -528,22 +528,22 @@
 	  (define-key company-active-map (kbd "<tab>") 'company-complete))
 
 	(use-package company-flx
-	  :defer t
+	  :ensure t
 	  :config (company-flx-mode t))
   #+end_src
 * LANGUAGE UTILS
   #+begin_src emacs-lisp
     (use-package smartparens
-      :defer t
+      :ensure t
       :config (progn (show-smartparens-global-mode t))
       :hook (prog-mode . turn-on-smartparens-mode))
 
     (use-package rainbow-delimiters
-      :defer t
+      :ensure t
       :hook (prog-mode . rainbow-delimiters-mode))
 
     (use-package highlight-indent-guides
-      :defer t
+      :ensure t
       :hook (prog-mode . highlight-indent-guides-mode)
       :custom
       (highlight-indent-guides-character ?\│)
@@ -558,7 +558,7 @@
 ** PYTHON
    #+begin_src emacs-lisp
      (use-package lsp-python-ms
-       :defer t
+       :ensure t
        :config
        (add-to-list 'lsp-language-id-configuration '(python-mode . "python"))
        :hook (python-mode . (lambda () (require 'lsp-python-ms) (lsp))))
@@ -583,7 +583,7 @@
 
 
      (use-package dart-mode
-       :defer t
+       :ensure t
        :config
        (add-to-list 'lsp-language-id-configuration '(dart-mode . "dart"))
        (with-eval-after-load "projectile"
@@ -591,7 +591,7 @@
 	 (add-to-list 'projectile-project-root-files-bottom-up "build")))
 
      (use-package flutter
-       :defer t
+       :ensure t
        :after dart-mode
        ;; :custom (flutter-sdk-path "/Applications/flutter/")
        :bind (:map dart-mode-map ("C-x C-s" . #'flutter-lsp-save)))
@@ -599,32 +599,32 @@
 ** LUA
    #+begin_src emacs-lisp
      (use-package lua-mode
-       :defer t)
+       :ensure t)
    #+end_src
 ** GROOVY
    #+begin_src emacs-lisp
   (use-package groovy-mode
-    :defer t
+    :ensure t
     :mode "\\.groovy\\'\\|\\.gradle\\'")
    #+end_src
 
 ** RUST
    #+begin_src emacs-lisp
      (use-package toml-mode
-       :defer t)
+       :ensure t)
 
      (use-package rust-mode
-       :defer t
+       :ensure t
        :init
        (setq rust-format-on-save t)
        :hook (rust-mode . lsp))
 
      (use-package cargo
-       :defer t
+       :ensure t
        :hook (rust-mode . cargo-minor-mode))
 
      (use-package flycheck-rust
-       :defer t
+       :ensure t
        :after (rust-mode)
        :hook ((rust-mode . flycheck-rust-setup)
 	      (flycheck-mode . flycheck-rust-setup)))
@@ -632,36 +632,36 @@
 ** JAVASCRIPT
    #+begin_src emacs-lisp
      (use-package json-mode
-       :defer t
+       :ensure t
        :mode (("\\.json\\'" . json-mode)
 	      ("\\.tmpl\\'" . json-mode)
 	      ("\\.eslintrc\\'" . json-mode))
        :config (setq-default js-indent-level 2))
 
      (use-package json-reformat
-       :defer t
+       :ensure t
        :after json-mode
        :bind (("C-c r" . json-reformat-region)))
 
      (use-package js2-mode 
-       :defer t
+       :ensure t
        :mode "\\.jsx?\\'"
        :config (setq js-indent-level 2)
        :hook (js2-mode . lsp))
 
      (use-package typescript-mode
-       :defer t
+       :ensure t
        :mode "\\.tsx?\\'"
        :config (setq typescript-indent-level 2)
        :hook (typescript-mode . lsp))
 
      (use-package prettier-js
-       :defer t
+       :ensure t
        :init (add-hook 'js2-mode-hook 'prettier-js-mode)
 	      (add-hook 'typescript-mode-hook 'prettier-js-mode))
 
      (use-package skewer-mode
-       :defer t
+       :ensure t
        :bind (("C-c K" . run-skewer))
        :diminish skewer-mode
        :init
@@ -683,19 +683,19 @@
       :ensure t
       :config
       (setq lsp-prefer-flymake nil
-	    lsp-dart-sdk-dir (get-dart-path)
+	    ;; lsp-dart-sdk-dir (get-dart-path)
 	    lsp-enable-on-type-formatting nil
 	    lsp-idle-delay 0.500   ;; can improve performance
 	    lsp-prefer-capf t      ;; replacing company-lsp
 	    lsp-log-max 10000)
       :hook 
-      (sh-mode . lsp-deferred)
-      (python-mode . lsp-deferred)
-      (dart-mode . lsp-deferred)
-      (js2-mode . lsp-deferred)
-      (typescript-mode . lsp-deferred)
+      (sh-mode . lsp-ensurered)
+      (python-mode . lsp-ensurered)
+      (dart-mode . lsp-ensurered)
+      (js2-mode . lsp-ensurered)
+      (typescript-mode . lsp-ensurered)
       (lsp-mode . lsp-enable-which-key-integration)
-      :commands (lsp lsp-deferred))
+      :commands (lsp lsp-ensurered))
 
     (use-package lsp-ui
       :ensure t
@@ -718,13 +718,12 @@
 ** GIT
    #+begin_src emacs-lisp
      (use-package magit
-       :defer t
-       :init (magit-auto-revert-mode -1)
+       :ensure t
        :config (setq magit-completing-read-function 'ivy-completing-read)
        :bind ("C-x g" . magit-status))
 
      (use-package forge
-       :defer t
+       :ensure t
        :after magit
        :config
        (add-to-list
@@ -738,17 +737,17 @@
 
      (if (display-graphic-p)
 	 (use-package git-gutter-fringe
-	   :defer t
+	   :ensure t
 	   :init (global-git-gutter-mode))
        (use-package git-gutter
-	 :defer t
+	 :ensure t
 	 :init (global-git-gutter-mode)))
 #+end_src
 ** DOCKER
 #+begin_src emacs-lisp
-  (use-package dockerfile-mode :defer t)
-  (use-package docker-compose-mode :defer t)
-  (use-package docker-tramp :defer t)
+  (use-package dockerfile-mode :ensure t)
+  (use-package docker-compose-mode :ensure t)
+  (use-package docker-tramp :ensure t)
 #+end_src
 
 * CUSTOM.EL CONFIG FILE
