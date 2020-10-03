@@ -164,7 +164,7 @@
       :config
       (setq doom-themes-enable-bold nil
 	    doom-themes-enable-italic nil)
-      (load-theme 'doom-city-lights t)
+      (load-theme 'doom-outrun-electric t)
       (doom-themes-visual-bell-config)
       (doom-themes-org-config))
 
@@ -276,71 +276,73 @@
   #+end_src
 * COUNSEL
   #+begin_src emacs-lisp
-	(use-package ivy
-	  :ensure t
-	  :diminish (ivy-mode . "")
-	  :init (ivy-mode t) ; globally at startup
-	  :config
-	  (setq ivy-count-format "%d/%d "
-		ivy-display-style 'fancy
-		ivy-initial-input-alist nil
-		ivy-re-builders-alist
-		'((t   . ivy--regex-fuzzy))))
+    (use-package ivy
+      :ensure t
+      :diminish (ivy-mode . "")
+      :init (ivy-mode t) ; globally at startup
+      :config
+      (setq ivy-count-format "%d/%d "
+	    ivy-display-style 'fancy
+	    ivy-initial-input-alist nil
+	    ivy-re-builders-alist
+	    '((swiper . ivy--regex-plus)
+	      (t      . ivy--regex-fuzzy))))
 
-	(use-package ivy-rich
-	  :ensure t
-	  :config
-	  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
-	  (ivy-rich-mode t))
+    (use-package ivy-rich
+      :ensure t
+      :config
+      (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+      (ivy-rich-mode t))
 
-	(use-package all-the-icons-ivy
-	  :ensure t
-	  :after ivy
-	  :config (all-the-icons-ivy-setup))
+    (use-package all-the-icons-ivy
+      :ensure t
+      :after ivy
+      :config (all-the-icons-ivy-setup))
 
-	(use-package amx
-	  :ensure t
-	  :after ivy
-	  :custom (amx-set-backend 'auto)
-	  :config (amx-mode t))
+    (use-package amx
+      :ensure t
+      :after ivy
+      :custom (amx-set-backend 'auto)
+      :config (amx-mode t))
 
-	(use-package flx :ensure t)
+    (use-package flx :ensure t)
 
-	(use-package counsel
-	  :ensure t
-	  :after (ivy amx)
-	  :bind* ; load when pressed
-	  (("C-x C-m" . counsel-M-x)
-	   ("M-x"     . counsel-M-x)
-	   ("C-s"     . swiper-isearch)
-	   ("C-r"     . swiper-isearch)
-	   ("C-x C-f" . counsel-find-file)
-	   ("C-x C-r" . counsel-recentf)
-	   ("C-c g"   . counsel-git)
-	   ("C-c j"   . counsel-git-grep)
-	   ("C-c /"   . counsel-ag)
-	   ("C-x l"   . counsel-locate)
-	   ("C-x C-f" . counsel-find-file)
-	   ("<f1> f"  . counsel-describe-function)
-	   ("<f1> v"  . counsel-describe-variable)
-	   ("<f1> l"  . counsel-find-library)
-	   ("<f2> i"  . counsel-info-lookup-symbol)
-	   ("<f2> u"  . counsel-unicode-char)
-	   ("C-c C-r" . ivy-resume)))
+    (use-package counsel
+      :ensure t
+      :after (ivy amx)
+      :bind* ; load when pressed
+      (("C-x C-m" . counsel-M-x)
+       ("M-x"     . counsel-M-x)
+       ("C-s"     . swiper-isearch)
+       ("C-r"     . swiper-isearch)
+       ("C-x C-f" . counsel-find-file)
+       ("C-x C-r" . counsel-recentf)
+       ("C-c g"   . counsel-git)
+       ("C-c j"   . counsel-git-grep)
+       ("C-c /"   . counsel-ag)
+       ("C-x l"   . counsel-locate)
+       ("C-x C-f" . counsel-find-file)
+       ("<f1> f"  . counsel-describe-function)
+       ("<f1> v"  . counsel-describe-variable)
+       ("<f1> l"  . counsel-find-library)
+       ("<f2> i"  . counsel-info-lookup-symbol)
+       ("<f2> u"  . counsel-unicode-char)
+       ("C-c C-r" . ivy-resume)))
 
-	(use-package counsel-osx-app
-	  :ensure t)
+    (use-package counsel-osx-app
+      :ensure t)
 
-	(use-package avy-flycheck
-	  :ensure t
-	  :config
-	  (global-set-key (kbd "C-'") #'avy-flycheck-goto-error))
+    (use-package avy-flycheck
+      :ensure t
+      :config
+      (global-set-key (kbd "C-'") #'avy-flycheck-goto-error))
   #+end_src
 * ORG
   #+begin_src emacs-lisp
     (use-package org
      :ensure org-plus-contrib
      :config (setq
+	      org-startup-folded t
 	      org-src-fontify-natively t
 	      org-src-tab-acts-natively t
 	      org-todo-keywords '((sequence "BACKLOG(b)" "TODO(t)" "DOING(n)" "|" "DONE(d)")
@@ -410,9 +412,12 @@
   #+end_src
 * PROJECTILE
   #+begin_src emacs-lisp
+    ;; projectile
     (use-package projectile
       :ensure t
-      :config (projectile-mode t))
+      :config
+      (projectile-global-mode)
+      (setq projectile-completion-system 'ivy))
 
     (use-package counsel-projectile
       :ensure t
@@ -711,7 +716,8 @@
       :ensure t
       :diminish yas-minor-mode
       :config
-      (use-package yasnippet-snippets :ensure t)
+      (use-package yasnippet-snippets
+	:ensure t)
       (yas-global-mode t))
   #+end_src
 * CLI CLIENTS
