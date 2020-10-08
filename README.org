@@ -123,22 +123,24 @@
 #+end_src
 * PACKAGE MANAGER
   #+begin_src emacs-lisp
-    (require 'package)
-    (setq package-check-signature nil)
-    (setq package-enable-at-startup nil)
-    (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/"))
-    (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
-    (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
-    (package-initialize)
+	(require 'package)
+	(setq package-check-signature nil)
+	(setq package-enable-at-startup nil)
+	(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/"))
+	(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+	(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
+	(package-initialize)
 
-    (unless (package-installed-p 'use-package)
-      (package-refresh-contents)
-      (package-install 'use-package))
+	(unless (package-installed-p 'use-package)
+	  (package-refresh-contents)
+	  (package-install 'use-package)
+	  (package-install 'diminish)
+	  (package-install 'bind-key))
 
-    (eval-when-compile
-      (require 'use-package))
-    (require 'diminish)
-    (require 'bind-key)
+	(eval-when-compile
+	  (require 'use-package))
+	(require 'diminish)
+	(require 'bind-key)
   #+end_src
 * EXEC PATH
   #+begin_src emacs-lisp
@@ -419,6 +421,15 @@
       (projectile-global-mode)
       (setq projectile-completion-system 'ivy))
 
+    ;; nameframe
+    ;; (use-package nameframe
+    ;;   :ensure t)
+
+    ;; (use-package nameframe-projectile
+    ;;   :ensure t
+    ;;   :config
+    ;;   (nameframe-projectile-mode t))
+
     (use-package counsel-projectile
       :ensure t
       :config
@@ -482,6 +493,10 @@
 	     "/"
 	     (mapconcat (lambda (item) item) (last path-items 2) "/"))
 	  pwd)))
+
+    (defun eshell/clear ()
+      "Clear and scrollback."
+      (eshell/clear-scrollback))
 
     (setq eshell-prompt-function
 	  (lambda nil
@@ -651,8 +666,15 @@
      (use-package js2-mode 
        :ensure t
        :mode "\\.jsx?\\'"
-       :config (setq js-indent-level 2)
+       :config (setq js2-basic-offset 2
+		     js-indent-level 2)
        :hook (js2-mode . lsp))
+
+     (use-package rjsx-mode
+       :ensure t
+       :mode "\\.jsx?\\'"
+       :config (setq-default js2-basic-offset 2))
+
 
      (use-package typescript-mode
        :ensure t
@@ -662,8 +684,10 @@
 
      (use-package prettier-js
        :ensure t
-       :init (add-hook 'js2-mode-hook 'prettier-js-mode)
-	      (add-hook 'typescript-mode-hook 'prettier-js-mode))
+       :init
+       (add-hook 'js2-mode-hook 'prettier-js-mode)
+       (add-hook 'rjsx-mode-hook 'prettier-js-mode)
+       (add-hook 'typescript-mode-hook 'prettier-js-mode))
 
      (use-package skewer-mode
        :ensure t
@@ -694,11 +718,11 @@
 	    lsp-prefer-capf t      ;; replacing company-lsp
 	    lsp-log-max 10000)
       :hook 
-      (sh-mode . lsp-ensurered)
-      (python-mode . lsp-ensurered)
-      (dart-mode . lsp-ensurered)
-      (js2-mode . lsp-ensurered)
-      (typescript-mode . lsp-ensurered)
+      (sh-mode . lsp)
+      (python-mode . lsp)
+      (dart-mode . lsp)
+      (js2-mode . lsp)
+      (typescript-mode . lsp)
       (lsp-mode . lsp-enable-which-key-integration)
       :commands (lsp lsp-ensurered))
 

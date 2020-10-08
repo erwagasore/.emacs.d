@@ -2,7 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 
-;; (custom-set-faces
+;;  (custom-set-faces
 ;;  ;; custom-set-faces was added by Custom.
 ;;  ;; If you edit it by hand, you could mess it up, so be careful.
 ;;  ;; Your init file should contain only one such instance.
@@ -17,6 +17,9 @@
 ;;  '(mode-line ((t (:background "#191919" :box nil))))
 ;;  '(mode-line-inactive ((t (:background "#282828" :foreground "#5B6268" :box nil))))
 ;;  '(term ((t (:foreground "#fafafa")))))
+
+(set-face-foreground 'vertical-border "#222944")
+
 
 ;;; custom.el ends here
 
