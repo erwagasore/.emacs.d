@@ -286,9 +286,10 @@
       (setq ivy-count-format "%d/%d "
 	    ivy-display-style 'fancy
 	    ivy-initial-input-alist nil
-	    ivy-re-builders-alist
-	    '((swiper . ivy--regex-plus)
-	      (t      . ivy--regex-fuzzy))))
+	    ;; ivy-re-builders-alist
+	    ;; '((swiper . ivy--regex-plus)
+	    ;;   (t      . ivy--regex-fuzzy))
+	    ))
 
     (use-package ivy-rich
       :ensure t
@@ -412,29 +413,21 @@
       (advice-add 'compilation-filter :around #'my-advice-compilation-filter)
       (advice-add 'gud-filter :around #'my-advice-compilation-filter))
   #+end_src
-* PROJECTILE
+* PROJECT MANAGEMENT
   #+begin_src emacs-lisp
     ;; projectile
     (use-package projectile
       :ensure t
       :config
-      (projectile-global-mode)
-      (setq projectile-completion-system 'ivy))
-
-    ;; nameframe
-    ;; (use-package nameframe
-    ;;   :ensure t)
-
-    ;; (use-package nameframe-projectile
-    ;;   :ensure t
-    ;;   :config
-    ;;   (nameframe-projectile-mode t))
+      (setq projectile-completion-system 'ivy)
+      (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+      (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+      (projectile-mode +1))
 
     (use-package counsel-projectile
       :ensure t
       :config
-      (counsel-projectile-mode)
-      (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+      (counsel-projectile-mode))
   #+end_src
 * ESHELL
   #+begin_src emacs-lisp
