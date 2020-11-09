@@ -172,6 +172,7 @@
 
     (use-package doom-modeline
       :ensure t
+      :config (setq doom-modeline-persp-name nil)
       :hook (after-init . doom-modeline-mode))
 
     (use-package winum
@@ -276,7 +277,7 @@
       (which-key-prefix-prefix "+")
       :config (which-key-mode t))
   #+end_src
-* COUNSEL
+* IVY, SWIPER & COUNSEL
   #+begin_src emacs-lisp
     (use-package ivy
       :ensure t
@@ -413,16 +414,37 @@
       (advice-add 'compilation-filter :around #'my-advice-compilation-filter)
       (advice-add 'gud-filter :around #'my-advice-compilation-filter))
   #+end_src
-* PROJECT MANAGEMENT
+* FRAME, WINDOW & PROJECT MANAGEMENT
   #+begin_src emacs-lisp
+    ;; nameframe
+    (use-package nameframe
+      :ensure t  
+      :config
+      (global-set-key (kbd "C-c ;") 'nameframe-switch-frame))
+
+    ;; perspective
+    (use-package perspective
+      :ensure t
+      :init
+      (setq persp-mode-prefix-key (kbd "C-c C-p"))
+      :config
+      (persp-mode)
+      (persp-turn-on-modestring)
+      (define-key persp-mode-map (kbd "C-x b") 'persp-switch-to-buffer*)
+      (define-key persp-mode-map (kbd "C-x k") 'persp-kill-buffer*))
+
+    (use-package nameframe-perspective
+      :ensure t  
+      :config
+      (nameframe-perspective-mode t))
+
     ;; projectile
     (use-package projectile
       :ensure t
       :config
+      (projectile-global-mode)
       (setq projectile-completion-system 'ivy)
-      (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
-      (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-      (projectile-mode +1))
+      (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
 
     (use-package counsel-projectile
       :ensure t
