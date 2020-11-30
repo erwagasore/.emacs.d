@@ -420,6 +420,7 @@
     (use-package nameframe
       :ensure t  
       :config
+      (global-set-key (kbd "C-c :") 'nameframe-create-frame)
       (global-set-key (kbd "C-c ;") 'nameframe-switch-frame))
 
     ;; perspective
