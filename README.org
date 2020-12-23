@@ -730,6 +730,7 @@
       (setq lsp-prefer-flymake nil
 	    ;; lsp-dart-sdk-dir (get-dart-path)
 	    lsp-enable-on-type-formatting nil
+	    lsp-headerline-breadcrumb-enable nil
 	    lsp-idle-delay 0.500   ;; can improve performance
 	    lsp-prefer-capf t      ;; replacing company-lsp
 	    lsp-log-max 10000)

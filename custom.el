@@ -19,7 +19,5 @@
 ;;  '(term ((t (:foreground "#fafafa")))))
 
 (set-face-foreground 'vertical-border "#222944")
-
-
 ;;; custom.el ends here
 
